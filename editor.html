@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TopRankVids Editor — Compose your TikTok ranking video with custom title, clips and colors.">
+  <title>TopRankVids — Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Anton&family=Bangers&family=Bebas+Neue&family=Luckiest+Guy&family=Oswald:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+  <div class="editor-layout">
+
+    <!-- ==================== LEFT: EDITING TOOLS ==================== -->
+    <aside class="editor-sidebar">
+
+      <header class="sidebar-header">
+        <a href="index.html" class="logo">TopRankVids</a>
+        <span class="rank-display" id="rank-display">Ranking: —</span>
+      </header>
+
+      <div class="sidebar-content">
+
+        <!-- ===== SECTION: Title ===== -->
+        <section class="editor-section" id="section-title">
+          <div class="section-header" data-section="title">
+            <h2>🎯 Video Title</h2>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="input-group">
+              <label class="input-label" for="title-input">Title Text</label>
+              <input type="text" class="title-main-input" id="title-input"
+                     placeholder="e.g. Ranking Most Humiliating Ankle Breaker"
+                     autocomplete="off">
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Word Colors (click a word to change)</label>
+              <div class="title-words-container" id="title-words">
+                <span class="words-hint">Type a title above to color each word</span>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Font &amp; Style</label>
+              <div class="title-controls">
+                <select class="select" id="font-select">
+                  <option value="Anton" selected>Anton</option>
+                  <option value="Bangers">Bangers</option>
+                  <option value="Bebas Neue">Bebas Neue</option>
+                  <option value="Luckiest Guy">Luckiest Guy</option>
+                  <option value="Oswald">Oswald</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="Impact">Impact</option>
+                  <option value="Arial Black">Arial Black</option>
+                </select>
+                <input type="number" class="input input-num" id="font-size" value="88" min="40" max="160" step="4" title="Font size (px)">
+                <button class="btn-style-toggle" id="btn-bold" title="Bold" type="button">B</button>
+                <button class="btn-style-toggle" id="btn-italic" title="Italic" type="button">I</button>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Text Stroke</label>
+              <div class="stroke-controls">
+                <button class="toggle active" id="stroke-toggle" title="Toggle stroke" type="button"></button>
+                <input type="number" class="input input-num" id="stroke-width" value="8" min="1" max="24" step="1" title="Stroke width">
+                <input type="color" id="stroke-color" value="#000000" title="Stroke color">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SECTION: General Settings ===== -->
+        <section class="editor-section" id="section-settings">
+          <div class="section-header" data-section="settings">
+            <h2>⚙️ General Settings</h2>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div class="setting-row">
+              <label for="bg-color">Background Color</label>
+              <input type="color" id="bg-color" value="#000000">
+            </div>
+            <div class="setting-row">
+              <label for="rank-color-mode">Rank Number Colors</label>
+              <select class="select" id="rank-color-mode">
+                <option value="auto" selected>Auto Gradient (Yellow→Red)</option>
+                <option value="single">Single Color</option>
+                <option value="custom">Custom Per Rank</option>
+              </select>
+            </div>
+            <div class="setting-row" id="rank-single-row" style="display:none;">
+              <label for="rank-single-color">Rank Color</label>
+              <input type="color" id="rank-single-color" value="#FFD700">
+            </div>
+            <div class="input-group" id="rank-custom-row" style="display:none;">
+              <label class="input-label">Color Per Rank</label>
+              <div class="rank-custom-colors" id="rank-custom-colors"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SECTION: Clips ===== -->
+        <section class="editor-section" id="section-clips">
+          <div class="section-header" data-section="clips">
+            <h2>🎬 Clips</h2>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div id="clip-slots"></div>
+          </div>
+        </section>
+
+        <!-- ===== SECTION: Playback Order ===== -->
+        <section class="editor-section" id="section-order">
+          <div class="section-header" data-section="order">
+            <h2>🔀 Playback Order</h2>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <p class="playback-hint">Drag to change the order clips play in. Default is countdown: last place first, #1 last.</p>
+            <div id="playback-list"></div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Export -->
+      <div class="export-section">
+        <button class="btn-export" id="btn-export" disabled type="button">🚀 Generate Video Ranking</button>
+        <div class="export-progress" id="export-progress">
+          <div class="export-progress-bar">
+            <div class="export-progress-fill" id="export-progress-fill"></div>
+          </div>
+          <p class="export-status" id="export-status">Preparing…</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================== RIGHT: PREVIEW ==================== -->
+    <main class="preview-panel">
+      <div class="preview-wrapper">
+        <div class="preview-canvas-container">
+          <canvas id="preview-canvas" width="1080" height="1920"></canvas>
+        </div>
+        <div class="preview-controls">
+          <button class="btn-play" id="btn-play" disabled title="Play preview" type="button">▶</button>
+          <div class="progress-bar-container" id="progress-bar">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <span class="time-display" id="time-display">0:00 / 0:00</span>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Hidden helpers -->
+  <input type="color" id="hidden-color-picker" style="position:fixed;top:-100px;left:-100px;opacity:0;pointer-events:none;">
+  <input type="file" id="hidden-file-input" accept="video/*" style="display:none;">
+
+  <!-- Scripts (classic scripts, order matters) -->
+  <script src="js/vendor/mp4-muxer.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/preview.js"></script>
+  <script src="js/exporter.js"></script>
+  <script src="js/editor.js"></script>
+</body>
+</html>
