@@ -128,9 +128,11 @@
             <span class="chevron">▼</span>
           </div>
           <div class="section-body">
-            <div id="publish-not-configured" class="publish-warning" style="display:none;">
-              ⚠ Publishing is not configured — a Google Client ID is required.<br>
-              See <strong>docs/YOUTUBE_SETUP.md</strong> for the one-time setup.
+            <div id="publish-not-configured" style="display:none;">
+              <div class="publish-warning">
+                ⚠ Publishing needs a one-time setup (free Google Client ID, ~15 min).
+              </div>
+              <button class="btn-connect btn-setup" id="btn-setup-open" type="button">⚙ Set up YouTube publishing</button>
             </div>
             <div id="publish-configured">
               <div class="setting-row">
@@ -155,6 +157,7 @@
                   <option value="private">Private</option>
                 </select>
               </div>
+              <button class="link-btn" id="btn-setup-edit" type="button">✎ Change Google Client ID</button>
             </div>
             <div class="coming-soon-row"><span>TikTok</span><span class="badge-soon">Coming soon</span></div>
             <div class="coming-soon-row"><span>Instagram</span><span class="badge-soon">Coming soon</span></div>
@@ -263,6 +266,55 @@
           <a class="btn-primary-sm" id="pr-link" href="#" target="_blank" rel="noopener" style="display:none;">Open video ↗</a>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Publishing setup wizard -->
+  <div class="modal-overlay" id="setup-modal" style="display:none;">
+    <div class="modal-card setup-card">
+      <button class="modal-close" id="setup-close" type="button" title="Close">✕</button>
+      <h3>⚙ YouTube publishing setup</h3>
+      <p class="setup-intro">One-time, free, ~15 minutes. The Client ID is a <strong>public</strong> identifier — no secret involved.</p>
+      <div class="setup-file-warning" id="setup-file-warning" style="display:none;">
+        ⚠ You opened the app from a local file (<code>file://</code>). Google sign-in only works from
+        a real web address — use the GitHub Pages site or a local server (<code>serve.ps1</code>).
+      </div>
+
+      <ol class="setup-steps">
+        <li>
+          Open the <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">Google Cloud Console ↗</a>
+          and create a project (any name, e.g. <em>TopRankVids</em>).
+        </li>
+        <li>
+          Enable the <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">YouTube Data API v3 ↗</a>.
+        </li>
+        <li>
+          In <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener">OAuth consent screen ↗</a>:
+          choose <strong>External</strong>, fill the minimum fields, then under <strong>Test users</strong> add the
+          Google account(s) that will publish (your own email).
+        </li>
+        <li>
+          In <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials ↗</a>:
+          <em>Create Credentials → OAuth client ID → Web application</em>.<br>
+          Under <strong>Authorized JavaScript origins</strong> add exactly:
+          <div class="code-chip-row">
+            <code class="code-chip" id="setup-origin">…</code>
+            <button class="btn-copy" id="setup-copy-origin" type="button" title="Copy">📋</button>
+          </div>
+        </li>
+        <li>
+          Copy the generated <strong>Client ID</strong> (ends in <code>.apps.googleusercontent.com</code>) and paste it here:
+          <input type="text" class="input setup-cid-input" id="setup-client-id"
+                 placeholder="1234567890-xxxxxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
+          <p class="setup-error" id="setup-error" style="display:none;"></p>
+        </li>
+      </ol>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="setup-cancel" type="button">Cancel</button>
+        <button class="btn-primary-sm" id="setup-save" type="button">Save &amp; enable</button>
+      </div>
+      <p class="setup-footnote">Full guide with troubleshooting: <strong>docs/YOUTUBE_SETUP.md</strong> in the repository.</p>
     </div>
   </div>
 

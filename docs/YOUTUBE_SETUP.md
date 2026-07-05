@@ -35,7 +35,13 @@ not a secret). This takes ~15 minutes and costs nothing.
 
 ## 5. Plug it into the app
 
-Open `js/config.js` and paste it:
+**Easiest way — in-app wizard:** open the editor → **📤 Publishing** section →
+**⚙ Set up YouTube publishing**. The wizard walks through these same steps (with the exact
+origin to copy, computed from the page you're on) and lets you paste the Client ID directly.
+It is saved in your browser's localStorage — no file edits, no commit needed.
+
+**Alternative — config file** (makes it the default for every browser/device):
+open `js/config.js` and paste it:
 
 ```js
 window.TRV_CONFIG = {
@@ -43,8 +49,8 @@ window.TRV_CONFIG = {
 };
 ```
 
-Commit/push (GitHub Pages) o ricarica in locale. La sezione **Publishing** nell'editor ora
-mostra "Connect YouTube".
+Commit/push (GitHub Pages) o ricarica in locale. In entrambi i casi la sezione **Publishing**
+nell'editor ora mostra "Connect YouTube". (Il valore nel wizard/localStorage ha priorità sul file.)
 
 ## Limits you should know
 

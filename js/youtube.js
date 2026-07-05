@@ -7,14 +7,31 @@
 
   var SCOPES = 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly';
 
+  var CID_KEY = 'trv_google_client_id';
+
   var accessToken = null;
   var expiresAt = 0;          // ms epoch
   var tokenClient = null;
+  var tokenClientId = null;   // client id the tokenClient was built with
   var channel = null;         // { title, thumb }
   var pendingAuth = null;     // { resolve, reject } for the in-flight token request
 
+  // Client ID set from the in-app setup wizard (localStorage) wins over config.js.
+  function getClientId() {
+    var stored = '';
+    try { stored = localStorage.getItem(CID_KEY) || ''; } catch (e) {}
+    return stored || (window.TRV_CONFIG && TRV_CONFIG.googleClientId) || '';
+  }
+
+  function setClientId(id) {
+    try { localStorage.setItem(CID_KEY, id || ''); } catch (e) {}
+    disconnect(); // old tokens belong to the old client
+    tokenClient = null;
+    tokenClientId = null;
+  }
+
   function isConfigured() {
-    return !!(window.TRV_CONFIG && TRV_CONFIG.googleClientId);
+    return !!getClientId();
   }
 
   function isConnected() {
@@ -37,9 +54,15 @@
   }
 
   function getTokenClient() {
+    var cid = getClientId();
+    if (tokenClient && tokenClientId !== cid) {
+      // Client ID changed via the setup wizard — rebuild against the new one.
+      tokenClient = null;
+    }
     if (!tokenClient) {
+      tokenClientId = cid;
       tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: TRV_CONFIG.googleClientId,
+        client_id: cid,
         scope: SCOPES,
         callback: function (resp) {
           var p = pendingAuth;
@@ -255,6 +278,8 @@
   TRV.youtube = {
     isConfigured: isConfigured,
     isConnected: isConnected,
+    getClientId: getClientId,
+    setClientId: setClientId,
     getChannel: getChannel,
     connect: connect,
     disconnect: disconnect,

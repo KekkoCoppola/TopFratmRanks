@@ -25,9 +25,12 @@
   var uploading = false;
 
   /* ---------- configured vs not ---------- */
-  var ok = TRV.youtube.isConfigured();
-  notConfigured.style.display = ok ? 'none' : '';
-  configured.style.display = ok ? '' : 'none';
+  function renderConfigState() {
+    var ok = TRV.youtube.isConfigured();
+    notConfigured.style.display = ok ? 'none' : '';
+    configured.style.display = ok ? '' : 'none';
+  }
+  renderConfigState();
 
   /* ---------- metadata persistence ---------- */
   try {
@@ -99,12 +102,71 @@
     });
   }
 
+  /* ---------- setup wizard ---------- */
+  var setupModal = $('setup-modal');
+  var setupInput = $('setup-client-id');
+  var setupError = $('setup-error');
+
+  function openSetup() {
+    // Only a real web origin can be authorized on Google's side.
+    $('setup-file-warning').style.display = location.protocol === 'file:' ? '' : 'none';
+    $('setup-origin').textContent = location.protocol === 'file:' ? 'http://localhost:8123' : location.origin;
+    setupInput.value = TRV.youtube.getClientId();
+    setupError.style.display = 'none';
+    setupModal.style.display = '';
+    setupInput.focus();
+  }
+
+  function closeSetup() { setupModal.style.display = 'none'; }
+
+  $('btn-setup-open').addEventListener('click', openSetup);
+  $('btn-setup-edit').addEventListener('click', openSetup);
+  $('setup-close').addEventListener('click', closeSetup);
+  $('setup-cancel').addEventListener('click', closeSetup);
+  setupModal.addEventListener('click', function (e) { if (e.target === setupModal) closeSetup(); });
+
+  $('setup-copy-origin').addEventListener('click', function () {
+    var text = $('setup-origin').textContent;
+    var btn = $('setup-copy-origin');
+    function flash() {
+      btn.textContent = '✓';
+      setTimeout(function () { btn.textContent = '📋'; }, 1200);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(flash, flash);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      flash();
+    }
+  });
+
+  $('setup-save').addEventListener('click', function () {
+    var id = setupInput.value.trim();
+    if (!/^[\w-]+(\.[\w-]+)*\.apps\.googleusercontent\.com$/.test(id)) {
+      setupError.textContent = 'That does not look like a Client ID — it must end with ".apps.googleusercontent.com".';
+      setupError.style.display = '';
+      return;
+    }
+    TRV.youtube.setClientId(id);
+    renderConfigState();
+    renderAccount();
+    updatePublishButton();
+    closeSetup();
+  });
+
+  setupInput.addEventListener('input', function () { setupError.style.display = 'none'; });
+
   /* ---------- publish button state ---------- */
   function updatePublishButton() {
     var hasVideo = !!TRV.lastExport;
     var confOk = TRV.youtube.isConfigured();
     publishBtn.disabled = uploading || !hasVideo || !confOk;
-    publishBtn.title = !confOk ? 'Publishing not configured (docs/YOUTUBE_SETUP.md)'
+    publishBtn.title = !confOk ? 'Set up publishing first (📤 Publishing section in the sidebar)'
       : !hasVideo ? 'Generate the video first'
       : 'Publish the generated video to YouTube';
   }

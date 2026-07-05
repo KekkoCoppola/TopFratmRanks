@@ -474,6 +474,66 @@ textarea.input { resize: vertical; min-height: 54px; }
   padding: 3px 10px;
 }
 
+.btn-setup { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 0;
+  text-align: left;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* ---- Setup wizard ---- */
+.modal-card.setup-card { max-width: 540px; max-height: 88vh; overflow-y: auto; }
+
+.setup-intro { font-size: 0.85rem; color: var(--text-2); margin-bottom: 14px; line-height: 1.5; }
+
+.setup-file-warning {
+  background: rgba(255, 84, 112, 0.08);
+  border: 1px solid rgba(255, 84, 112, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.setup-steps { margin: 0 0 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.setup-steps li { font-size: 0.85rem; line-height: 1.55; color: var(--text-2); }
+.setup-steps li strong, .setup-steps li em { color: var(--text); }
+.setup-steps a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.setup-steps a:hover { text-decoration: underline; }
+.setup-steps code { color: var(--ok); font-size: 0.8rem; }
+
+.code-chip-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.code-chip {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  color: var(--ok);
+  word-break: break-all;
+}
+.btn-copy {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-2);
+  padding: 7px 10px;
+  font-size: 0.85rem;
+}
+.btn-copy:hover { border-color: var(--accent); }
+
+.setup-cid-input { margin-top: 8px; font-size: 0.8rem; }
+.setup-error { color: var(--danger); font-size: 0.78rem; font-weight: 700; margin-top: 6px; }
+.setup-footnote { margin-top: 14px; font-size: 0.75rem; color: var(--muted); }
+
 /* ---- Publish modal ---- */
 .modal-overlay {
   position: fixed;
