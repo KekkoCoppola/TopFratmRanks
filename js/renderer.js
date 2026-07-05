@@ -50,16 +50,15 @@
     var titleBottomY = lines.length ? titleTop + lines.length * lineH + 44 : 60;
 
     var N = state.rankCount;
-    var zoneTop = titleBottomY + 90;
-    var zoneBottom = H - 170;
-    var slotFont = Math.max(48, Math.min(88, Math.floor((zoneBottom - zoneTop) / N * 0.45)));
+    // Fixed, user-configurable number size and spacing, clustered near the top
+    // (rather than stretched across the whole frame) — like real ranking videos.
+    var slotFont = state.rankNumberSize;
+    var gap = state.rankNumberGap;
+    var zoneTop = titleBottomY + 70 + slotFont / 2;
 
     var slots = [];
     for (var i = 0; i < N; i++) {
-      var y = N === 1
-        ? (zoneTop + zoneBottom) / 2
-        : zoneTop + (zoneBottom - zoneTop) * (i / (N - 1));
-      slots.push({ x: 56, y: y, fontSize: slotFont });
+      slots.push({ x: 56, y: zoneTop + i * gap, fontSize: slotFont });
     }
     return { lines: lines, lineH: lineH, titleTop: titleTop, titleBottomY: titleBottomY, slots: slots };
   }

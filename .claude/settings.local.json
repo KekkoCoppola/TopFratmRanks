@@ -10,7 +10,9 @@
       "PowerShell(git commit -m \"feat: TopRankVids editor, preview and export \\(WebCodecs MP4 + WebM fallback\\)\")",
       "PowerShell(python --version)",
       "PowerShell(Copy-Item \"$env:USERPROFILE\\\\Downloads\\\\ranking-most-extreme-weather.mp4\" \"D:\\\\PROGETTI\\\\TopFratmRanks\\\\__test-output.mp4\"; $b = [IO.File]::ReadAllBytes\\(\"D:\\\\PROGETTI\\\\TopFratmRanks\\\\__test-output.mp4\"\\)[0..15]; \\($b | ForEach-Object { $_.ToString\\('X2'\\) }\\) -join ' ')",
-      "PowerShell(git commit -q -m \"feat: Clip Size setting \\(fit whole clip / fill width\\) with fit as default\")"
+      "PowerShell(git commit -q -m \"feat: Clip Size setting \\(fit whole clip / fill width\\) with fit as default\")",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

@@ -20,6 +20,8 @@
     },
     bgColor: '#000000',
     clipFit: 'fit',             // 'fit' = whole clip visible | 'fill' = full width, cropped
+    rankNumberSize: 72,         // rank number font size (px on the 1080x1920 canvas)
+    rankNumberGap: 150,         // vertical distance between consecutive rank numbers (px)
     rankColorMode: 'auto',      // 'auto' | 'single' | 'custom'
     rankSingleColor: '#FFD700',
     rankCustomColors: [],       // [rankIndex] -> css color

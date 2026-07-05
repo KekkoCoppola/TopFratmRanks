@@ -248,6 +248,16 @@ input, select { font-family: inherit; }
 
 .stroke-controls { display: flex; align-items: center; gap: 10px; }
 
+.range-control { display: flex; align-items: center; gap: 10px; min-width: 170px; }
+.range-control input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.range-control .range-value {
+  min-width: 34px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
 .toggle {
   width: 42px; height: 24px;
   border-radius: 12px;

@@ -146,6 +146,22 @@
     TRV.emitChange();
   });
 
+  var rankNumberSize = document.getElementById('rank-number-size');
+  var rankNumberSizeVal = document.getElementById('rank-number-size-val');
+  rankNumberSize.addEventListener('input', function () {
+    state.rankNumberSize = parseInt(rankNumberSize.value, 10);
+    rankNumberSizeVal.textContent = rankNumberSize.value;
+    TRV.emitChange();
+  });
+
+  var rankNumberGap = document.getElementById('rank-number-gap');
+  var rankNumberGapVal = document.getElementById('rank-number-gap-val');
+  rankNumberGap.addEventListener('input', function () {
+    state.rankNumberGap = parseInt(rankNumberGap.value, 10);
+    rankNumberGapVal.textContent = rankNumberGap.value;
+    TRV.emitChange();
+  });
+
   var rankColorMode = document.getElementById('rank-color-mode');
   var rankSingleRow = document.getElementById('rank-single-row');
   var rankCustomRow = document.getElementById('rank-custom-row');
