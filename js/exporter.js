@@ -223,7 +223,9 @@
     muxer.finalize();
     var blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
     var filename = slugify(TRV.state.title.text) + '.mp4';
+    TRV.lastExport = { blob: blob, filename: filename };
     download(blob, filename);
+    TRV.emitChange(); // lets the Publish button light up
     return { filename: filename };
   }
 
@@ -279,7 +281,9 @@
         var ext = isMp4 ? '.mp4' : '.webm';
         var blob = new Blob(parts, { type: mime.split(';')[0] });
         var filename = slugify(TRV.state.title.text) + ext;
+        TRV.lastExport = { blob: blob, filename: filename };
         download(blob, filename);
+        TRV.emitChange(); // lets the Publish button light up
         resolve({ filename: filename });
       };
       recorder.onerror = function (e) { reject(e.error || new Error('Recording failed.')); };

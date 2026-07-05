@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Anton&family=Bangers&family=Bebas+Neue&family=Luckiest+Guy&family=Oswald:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="editor-layout">
@@ -120,6 +121,46 @@
           </div>
         </section>
 
+        <!-- ===== SECTION: Publishing ===== -->
+        <section class="editor-section" id="section-publish">
+          <div class="section-header" data-section="publish">
+            <h2>📤 Publishing</h2>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="section-body">
+            <div id="publish-not-configured" class="publish-warning" style="display:none;">
+              ⚠ Publishing is not configured — a Google Client ID is required.<br>
+              See <strong>docs/YOUTUBE_SETUP.md</strong> for the one-time setup.
+            </div>
+            <div id="publish-configured">
+              <div class="setting-row">
+                <label>YouTube Account</label>
+                <div class="yt-account" id="yt-account">
+                  <button class="btn-connect" id="btn-yt-connect" type="button">Connect YouTube</button>
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="yt-title">YouTube Title <span style="text-transform:none;">(empty = ranking title + #Shorts)</span></label>
+                <input type="text" class="input" id="yt-title" maxlength="100" placeholder="Uses the ranking title if empty">
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="yt-desc">Description</label>
+                <textarea class="input" id="yt-desc" rows="2">#Shorts</textarea>
+              </div>
+              <div class="setting-row">
+                <label for="yt-privacy">Privacy</label>
+                <select class="select" id="yt-privacy">
+                  <option value="public" selected>Public</option>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+            </div>
+            <div class="coming-soon-row"><span>TikTok</span><span class="badge-soon">Coming soon</span></div>
+            <div class="coming-soon-row"><span>Instagram</span><span class="badge-soon">Coming soon</span></div>
+          </div>
+        </section>
+
         <!-- ===== SECTION: Clips ===== -->
         <section class="editor-section" id="section-clips">
           <div class="section-header" data-section="clips">
@@ -138,9 +179,12 @@
 
       </div>
 
-      <!-- Export -->
+      <!-- Export + Publish -->
       <div class="export-section">
-        <button class="btn-export" id="btn-export" disabled type="button">🚀 Generate Video Ranking</button>
+        <div class="export-buttons">
+          <button class="btn-export" id="btn-export" disabled type="button">🚀 Generate Video Ranking</button>
+          <button class="btn-publish" id="btn-publish" disabled type="button" title="Generate the video first">📤 Publish</button>
+        </div>
         <div class="export-progress" id="export-progress">
           <div class="export-progress-bar">
             <div class="export-progress-fill" id="export-progress-fill"></div>
@@ -171,17 +215,71 @@
 
   </div>
 
+  <!-- Publish modal -->
+  <div class="modal-overlay" id="publish-modal" style="display:none;">
+    <div class="modal-card">
+      <button class="modal-close" id="publish-close" type="button" title="Close">✕</button>
+
+      <!-- Step 1: summary -->
+      <div class="modal-step" id="publish-step-summary">
+        <h3>📤 Publish to YouTube</h3>
+        <dl class="publish-summary">
+          <dt>Title</dt><dd id="ps-title">—</dd>
+          <dt>Privacy</dt><dd id="ps-privacy">—</dd>
+          <dt>File</dt><dd id="ps-file">—</dd>
+          <dt>Channel</dt><dd id="ps-channel">—</dd>
+        </dl>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="ps-cancel" type="button">Cancel</button>
+          <button class="btn-primary-sm" id="ps-connect" type="button" style="display:none;">Sign in with Google</button>
+          <button class="btn-primary-sm" id="ps-continue" type="button">Continue →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: final confirmation -->
+      <div class="modal-step" id="publish-step-confirm" style="display:none;">
+        <h3>⚠ Final confirmation</h3>
+        <p class="confirm-text" id="pc-text">The video will be published…</p>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="pc-back" type="button">← Back</button>
+          <button class="btn-danger" id="pc-publish" type="button">Publish now</button>
+        </div>
+      </div>
+
+      <!-- Step 3: progress -->
+      <div class="modal-step" id="publish-step-progress" style="display:none;">
+        <h3>Uploading…</h3>
+        <div class="export-progress-bar"><div class="export-progress-fill" id="pp-fill"></div></div>
+        <p class="export-status" id="pp-status">Starting…</p>
+      </div>
+
+      <!-- Step 4: result -->
+      <div class="modal-step" id="publish-step-result" style="display:none;">
+        <h3 id="pr-title">Done</h3>
+        <p class="result-text" id="pr-text"></p>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="pr-close" type="button">Close</button>
+          <button class="btn-danger" id="pr-retry" type="button" style="display:none;">Retry</button>
+          <a class="btn-primary-sm" id="pr-link" href="#" target="_blank" rel="noopener" style="display:none;">Open video ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Hidden helpers -->
   <input type="color" id="hidden-color-picker" style="position:fixed;top:-100px;left:-100px;opacity:0;pointer-events:none;">
   <input type="file" id="hidden-file-input" accept="video/*" style="display:none;">
 
   <!-- Scripts (classic scripts, order matters) -->
   <script src="js/vendor/mp4-muxer.js"></script>
+  <script src="js/config.js"></script>
   <script src="js/state.js"></script>
   <script src="js/link-import.js"></script>
   <script src="js/renderer.js"></script>
   <script src="js/preview.js"></script>
   <script src="js/exporter.js"></script>
+  <script src="js/youtube.js"></script>
   <script src="js/editor.js"></script>
+  <script src="js/publish-ui.js"></script>
 </body>
 </html>
