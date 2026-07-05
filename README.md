@@ -6,7 +6,7 @@ The project is hosted and accessible directly via GitHub at [KekkoCoppola.github
 
 ---
 
-## ⚠️ CRITICAL LEGAL DISCLAIMER & TERMS OF USE
+## ⚠️ CRITICAL LEGAL DISCLAIMER & TERMS OF USE !IMPORTANT!
 **(Read carefully before deploying or using this application)**
 
 1. **Illustrative & Mockup Simulation Purposes Only**:
