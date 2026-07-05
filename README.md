@@ -2,6 +2,8 @@
 
 A lightweight, local, 100% client-side web application designed to help users generate vertical ranking videos (1080×1920) optimized for short-form social video platforms (such as TikTok, YouTube Shorts, and Instagram Reels) directly in the browser—with zero server installation.
 
+The project is hosted and accessible directly via GitHub at [github.com/KekkoCoppola/TopFratmRanks](https://github.com/KekkoCoppola/TopFratmRanks).
+
 ---
 
 ## ⚠️ CRITICAL LEGAL DISCLAIMER & TERMS OF USE
