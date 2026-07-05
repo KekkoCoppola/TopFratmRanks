@@ -147,19 +147,15 @@
   });
 
   var rankNumberSize = document.getElementById('rank-number-size');
-  var rankNumberSizeVal = document.getElementById('rank-number-size-val');
   rankNumberSize.addEventListener('input', function () {
-    state.rankNumberSize = parseInt(rankNumberSize.value, 10);
-    rankNumberSizeVal.textContent = rankNumberSize.value;
-    TRV.emitChange();
+    var v = parseInt(rankNumberSize.value, 10);
+    if (isFinite(v)) { state.rankNumberSize = Math.max(20, Math.min(200, v)); TRV.emitChange(); }
   });
 
   var rankNumberGap = document.getElementById('rank-number-gap');
-  var rankNumberGapVal = document.getElementById('rank-number-gap-val');
   rankNumberGap.addEventListener('input', function () {
-    state.rankNumberGap = parseInt(rankNumberGap.value, 10);
-    rankNumberGapVal.textContent = rankNumberGap.value;
-    TRV.emitChange();
+    var v = parseInt(rankNumberGap.value, 10);
+    if (isFinite(v)) { state.rankNumberGap = Math.max(40, Math.min(500, v)); TRV.emitChange(); }
   });
 
   var rankColorMode = document.getElementById('rank-color-mode');
