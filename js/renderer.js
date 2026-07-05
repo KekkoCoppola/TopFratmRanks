@@ -87,16 +87,21 @@
 
     var L = layout(ctx, state);
 
-    // current clip frame (between title band and bottom)
+    // current clip frame: always full width (like real ranking videos),
+    // vertically centered in the zone below the title, cropped if taller.
     var v = playback.videoEl;
     if (v && v.videoWidth) {
       var zoneTop = L.titleBottomY;
       var availH = H - zoneTop;
-      var fitWidthH = v.videoHeight * (W / v.videoWidth);
-      var s = fitWidthH <= availH ? (W / v.videoWidth) : Math.min(W / v.videoWidth, availH / v.videoHeight);
-      var dw = v.videoWidth * s;
+      var s = W / v.videoWidth;
+      var dw = W;
       var dh = v.videoHeight * s;
-      ctx.drawImage(v, (W - dw) / 2, zoneTop + (availH - dh) / 2, dw, dh);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, zoneTop, W, availH);
+      ctx.clip();
+      ctx.drawImage(v, 0, zoneTop + (availH - dh) / 2, dw, dh);
+      ctx.restore();
     }
 
     // title

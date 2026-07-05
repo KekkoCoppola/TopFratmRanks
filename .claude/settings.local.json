@@ -7,7 +7,9 @@
       "PowerShell(git commit -m \"Add TopRankVids design spec\")",
       "PowerShell(git check-ignore -v index.html editor.html server.js)",
       "PowerShell($c = Get-Content D:\\\\PROGETTI\\\\TopFratmRanks\\\\js\\\\vendor\\\\mp4-muxer.js -Raw; $c.Substring\\(0, 300\\))",
-      "PowerShell(git commit -m \"feat: TopRankVids editor, preview and export \\(WebCodecs MP4 + WebM fallback\\)\")"
+      "PowerShell(git commit -m \"feat: TopRankVids editor, preview and export \\(WebCodecs MP4 + WebM fallback\\)\")",
+      "PowerShell(python --version)",
+      "PowerShell(Copy-Item \"$env:USERPROFILE\\\\Downloads\\\\ranking-most-extreme-weather.mp4\" \"D:\\\\PROGETTI\\\\TopFratmRanks\\\\__test-output.mp4\"; $b = [IO.File]::ReadAllBytes\\(\"D:\\\\PROGETTI\\\\TopFratmRanks\\\\__test-output.mp4\"\\)[0..15]; \\($b | ForEach-Object { $_.ToString\\('X2'\\) }\\) -join ' ')"
     ]
   }
 }
