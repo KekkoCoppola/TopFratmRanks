@@ -87,20 +87,23 @@
 
     var L = layout(ctx, state);
 
-    // current clip frame: always full width (like real ranking videos),
-    // vertically centered in the zone below the title, cropped if taller.
+    // current clip frame, in the zone between title and bottom.
+    // 'fit'  -> whole clip visible (letterboxed if needed)
+    // 'fill' -> full width, cropped vertically if taller than the zone
     var v = playback.videoEl;
     if (v && v.videoWidth) {
       var zoneTop = L.titleBottomY;
       var availH = H - zoneTop;
-      var s = W / v.videoWidth;
-      var dw = W;
+      var s = state.clipFit === 'fill'
+        ? W / v.videoWidth
+        : Math.min(W / v.videoWidth, availH / v.videoHeight);
+      var dw = v.videoWidth * s;
       var dh = v.videoHeight * s;
       ctx.save();
       ctx.beginPath();
       ctx.rect(0, zoneTop, W, availH);
       ctx.clip();
-      ctx.drawImage(v, 0, zoneTop + (availH - dh) / 2, dw, dh);
+      ctx.drawImage(v, (W - dw) / 2, zoneTop + (availH - dh) / 2, dw, dh);
       ctx.restore();
     }
 

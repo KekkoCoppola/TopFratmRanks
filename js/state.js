@@ -19,6 +19,7 @@
       wordColors: [] // parallel to title words; missing entries default to white
     },
     bgColor: '#000000',
+    clipFit: 'fit',             // 'fit' = whole clip visible | 'fill' = full width, cropped
     rankColorMode: 'auto',      // 'auto' | 'single' | 'custom'
     rankSingleColor: '#FFD700',
     rankCustomColors: [],       // [rankIndex] -> css color

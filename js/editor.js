@@ -140,6 +140,12 @@
     TRV.emitChange();
   });
 
+  var clipFit = document.getElementById('clip-fit');
+  clipFit.addEventListener('change', function () {
+    state.clipFit = clipFit.value;
+    TRV.emitChange();
+  });
+
   var rankColorMode = document.getElementById('rank-color-mode');
   var rankSingleRow = document.getElementById('rank-single-row');
   var rankCustomRow = document.getElementById('rank-custom-row');
