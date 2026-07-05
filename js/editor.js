@@ -192,6 +192,8 @@
   var hiddenFileInput = document.getElementById('hidden-file-input');
   var fileTargetRank = -1;
   var slotErrors = {}; // rankIndex -> message
+  var dragFromRank = -1;
+  var activeClipRank = -1; // currently highlighted clip
 
   function buildSlots() {
     slotsContainer.innerHTML = '';
@@ -202,6 +204,61 @@
     var clip = state.clips[rankIndex];
     var slot = document.createElement('div');
     slot.className = 'clip-slot';
+    if (rankIndex === activeClipRank) slot.classList.add('clip-active');
+
+    // Make loaded clips draggable for reordering
+    if (clip) {
+      slot.draggable = true;
+      slot.dataset.rank = rankIndex;
+
+      slot.addEventListener('dragstart', function (e) {
+        dragFromRank = rankIndex;
+        slot.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        // Set minimal drag data so the browser allows dragging
+        e.dataTransfer.setData('text/plain', '' + rankIndex);
+      });
+      slot.addEventListener('dragend', function () {
+        slot.classList.remove('dragging');
+        dragFromRank = -1;
+        // Clean up all drag-over states
+        slotsContainer.querySelectorAll('.drag-over').forEach(function (el) {
+          el.classList.remove('drag-over');
+        });
+      });
+    }
+
+    // All slots (even empty) can be drop targets
+    slot.addEventListener('dragover', function (e) {
+      if (dragFromRank < 0 || dragFromRank === rankIndex) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      slot.classList.add('drag-over');
+    });
+    slot.addEventListener('dragleave', function () {
+      slot.classList.remove('drag-over');
+    });
+    slot.addEventListener('drop', function (e) {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      if (dragFromRank < 0 || dragFromRank === rankIndex) return;
+      // Swap the two clips
+      var tmp = state.clips[dragFromRank];
+      state.clips[dragFromRank] = state.clips[rankIndex];
+      state.clips[rankIndex] = tmp;
+      // Swap custom colors too
+      var tmpColor = state.rankCustomColors[dragFromRank];
+      state.rankCustomColors[dragFromRank] = state.rankCustomColors[rankIndex];
+      state.rankCustomColors[rankIndex] = tmpColor;
+      // Swap slot errors
+      var tmpErr = slotErrors[dragFromRank];
+      slotErrors[dragFromRank] = slotErrors[rankIndex];
+      slotErrors[rankIndex] = tmpErr;
+      TRV.syncPlaybackOrder();
+      dragFromRank = -1;
+      buildSlots();
+      TRV.emitChange();
+    });
 
     var header = document.createElement('div');
     header.className = 'clip-slot-header';
@@ -215,10 +272,11 @@
       removeBtn.className = 'btn-icon';
       removeBtn.textContent = '🗑';
       removeBtn.title = 'Remove clip';
-      removeBtn.addEventListener('click', function () {
+      removeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
         TRV.removeClip(rankIndex);
+        if (activeClipRank === rankIndex) activeClipRank = -1;
         buildSlots();
-        rebuildPlaybackList();
         TRV.emitChange();
       });
       header.appendChild(removeBtn);
@@ -241,6 +299,7 @@
       dz.addEventListener('drop', function (e) {
         e.preventDefault();
         dz.classList.remove('dragover');
+        // Only handle file drops, not clip reorder drops
         var file = e.dataTransfer.files && e.dataTransfer.files[0];
         if (file) handleFile(rankIndex, file);
       });
@@ -248,6 +307,15 @@
     } else {
       var loaded = document.createElement('div');
       loaded.className = 'clip-loaded';
+
+      // Click on clip -> preview that clip
+      loaded.addEventListener('click', function () {
+        activeClipRank = rankIndex;
+        buildSlots();
+        if (TRV.preview && TRV.preview.seekToRank) {
+          TRV.preview.seekToRank(rankIndex);
+        }
+      });
 
       var thumb = document.createElement('canvas');
       thumb.className = 'clip-thumb';
@@ -270,9 +338,9 @@
       nameInput.className = 'input clip-name-input';
       nameInput.placeholder = 'Label shown next to #' + (rankIndex + 1) + ' (e.g. "Wow")';
       nameInput.value = clip.name;
+      nameInput.addEventListener('click', function (e) { e.stopPropagation(); });
       nameInput.addEventListener('input', function () {
         clip.name = nameInput.value;
-        rebuildPlaybackList();
         TRV.emitChange();
       });
 
@@ -317,7 +385,6 @@
     }
     TRV.loadClip(rankIndex, file).then(function () {
       buildSlots();
-      rebuildPlaybackList();
       TRV.emitChange();
     }).catch(function (err) {
       slotErrors[rankIndex] = err.message || 'Cannot load this clip.';
@@ -330,65 +397,14 @@
     if (file && fileTargetRank >= 0) handleFile(fileTargetRank, file);
   });
 
-  /* ---------- playback order ---------- */
-  var playbackList = document.getElementById('playback-list');
-  var dragFrom = -1;
-
-  function rebuildPlaybackList() {
-    playbackList.innerHTML = '';
-    if (!state.playbackOrder.length) {
-      var hint = document.createElement('p');
-      hint.className = 'playback-hint';
-      hint.textContent = 'Load clips to define the play order.';
-      playbackList.appendChild(hint);
-      return;
-    }
-    state.playbackOrder.forEach(function (rankIndex, pos) {
-      var clip = state.clips[rankIndex];
-      if (!clip) return;
-      var item = document.createElement('div');
-      item.className = 'playback-item';
-      item.draggable = true;
-      item.dataset.pos = pos;
-      item.innerHTML =
-        '<span class="grip">⠿</span>' +
-        '<span class="pos-badge">' + (pos + 1) + '</span>' +
-        '<span class="pb-label"><span class="pb-rank">#' + (rankIndex + 1) + '</span> — ' +
-        escapeHtml(clip.name || '(no label)') + '</span>';
-
-      item.addEventListener('dragstart', function () {
-        dragFrom = pos;
-        item.classList.add('dragging');
-      });
-      item.addEventListener('dragend', function () {
-        item.classList.remove('dragging');
-        dragFrom = -1;
-      });
-      item.addEventListener('dragover', function (e) {
-        e.preventDefault();
-        item.classList.add('drag-over');
-      });
-      item.addEventListener('dragleave', function () { item.classList.remove('drag-over'); });
-      item.addEventListener('drop', function (e) {
-        e.preventDefault();
-        item.classList.remove('drag-over');
-        if (dragFrom < 0 || dragFrom === pos) return;
-        var moved = state.playbackOrder.splice(dragFrom, 1)[0];
-        state.playbackOrder.splice(pos, 0, moved);
-        state.orderCustomized = true;
-        rebuildPlaybackList();
-        TRV.emitChange();
-      });
-
-      playbackList.appendChild(item);
-    });
-  }
-
-  function escapeHtml(s) {
-    return s.replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
+  /* ---------- shuffle button ---------- */
+  var shuffleBtn = document.getElementById('btn-shuffle');
+  shuffleBtn.addEventListener('click', function (e) {
+    e.stopPropagation(); // don't toggle the collapsible section
+    if (TRV.loadedClipCount() < 2) return;
+    TRV.shufflePlaybackOrder();
+    TRV.emitChange();
+  });
 
   /* ---------- export button state ---------- */
   var exportBtn = document.getElementById('btn-export');
@@ -433,7 +449,6 @@
 
   /* ---------- boot ---------- */
   buildSlots();
-  rebuildPlaybackList();
   updateExportButton();
   loadFontThenRedraw(state.title.font);
 })();

@@ -8,6 +8,7 @@
   var playBtn = document.getElementById('btn-play');
   var progressBar = document.getElementById('progress-bar');
   var progressFill = document.getElementById('progress-fill');
+  var progressThumb = document.getElementById('progress-thumb');
   var timeDisplay = document.getElementById('time-display');
 
   var playing = false;
@@ -47,7 +48,9 @@
   }
 
   function updateBar(t, total) {
-    progressFill.style.width = total > 0 ? (t / total * 100) + '%' : '0%';
+    var pct = total > 0 ? (t / total * 100) : 0;
+    progressFill.style.width = pct + '%';
+    progressThumb.style.left = pct + '%';
     timeDisplay.textContent = fmt(t) + ' / ' + fmt(total);
   }
 
@@ -163,7 +166,21 @@
             drawPlaying();
           });
         }
+        updateBar(t, tl.total);
         break;
+      }
+    }
+  }
+
+  // Seek to the segment for a specific rank index (used by click-to-preview on clips)
+  function seekToRank(rankIndex) {
+    var tl = getTimeline();
+    for (var i = 0; i < tl.segs.length; i++) {
+      if (tl.segs[i].rankIndex === rankIndex) {
+        var wasPlaying = playing;
+        if (wasPlaying) pause();
+        seek(tl.segs[i].start);
+        return;
       }
     }
   }
@@ -172,11 +189,45 @@
     if (playing) pause(); else play();
   });
 
-  progressBar.addEventListener('click', function (e) {
+  /* ---------- Pointer-capture slider ---------- */
+  var scrubbing = false;
+
+  function getTimeFromPointer(e) {
+    var rect = progressBar.getBoundingClientRect();
+    var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    var tl = getTimeline();
+    return ratio * tl.total;
+  }
+
+  progressBar.addEventListener('pointerdown', function (e) {
     var tl = getTimeline();
     if (!tl.segs.length) return;
-    var rect = progressBar.getBoundingClientRect();
-    seek(((e.clientX - rect.left) / rect.width) * tl.total);
+    e.preventDefault();
+    scrubbing = true;
+    progressBar.classList.add('scrubbing');
+    progressBar.setPointerCapture(e.pointerId);
+    // Pause playback while scrubbing
+    if (playing) pause();
+    seek(getTimeFromPointer(e));
+  });
+
+  progressBar.addEventListener('pointermove', function (e) {
+    if (!scrubbing) return;
+    e.preventDefault();
+    seek(getTimeFromPointer(e));
+  });
+
+  progressBar.addEventListener('pointerup', function (e) {
+    if (!scrubbing) return;
+    scrubbing = false;
+    progressBar.classList.remove('scrubbing');
+    progressBar.releasePointerCapture(e.pointerId);
+  });
+
+  progressBar.addEventListener('pointercancel', function (e) {
+    if (!scrubbing) return;
+    scrubbing = false;
+    progressBar.classList.remove('scrubbing');
   });
 
   // Redraw whenever the editor state changes (unless mid-playback: tick handles it).
@@ -192,6 +243,7 @@
   TRV.preview = {
     redraw: redraw,
     getTimeline: getTimeline,
+    seekToRank: seekToRank,
     stop: function () { stop(); drawIdle(); },
     isPlaying: function () { return playing; }
   };

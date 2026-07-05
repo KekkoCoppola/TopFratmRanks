@@ -116,24 +116,17 @@
         <section class="editor-section" id="section-clips">
           <div class="section-header" data-section="clips">
             <h2>🎬 Clips</h2>
-            <span class="chevron">▼</span>
+            <div class="section-header-actions">
+              <button class="btn-shuffle" id="btn-shuffle" type="button" title="Shuffle clip order">🔀 Shuffle</button>
+              <span class="chevron">▼</span>
+            </div>
           </div>
           <div class="section-body">
             <div id="clip-slots"></div>
           </div>
         </section>
 
-        <!-- ===== SECTION: Playback Order ===== -->
-        <section class="editor-section" id="section-order">
-          <div class="section-header" data-section="order">
-            <h2>🔀 Playback Order</h2>
-            <span class="chevron">▼</span>
-          </div>
-          <div class="section-body">
-            <p class="playback-hint">Drag to change the order clips play in. Default is countdown: last place first, #1 last.</p>
-            <div id="playback-list"></div>
-          </div>
-        </section>
+
 
       </div>
 
@@ -158,7 +151,10 @@
         <div class="preview-controls">
           <button class="btn-play" id="btn-play" disabled title="Play preview" type="button">▶</button>
           <div class="progress-bar-container" id="progress-bar">
-            <div class="progress-bar-fill" id="progress-fill"></div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-bar-thumb" id="progress-thumb"></div>
           </div>
           <span class="time-display" id="time-display">0:00 / 0:00</span>
         </div>

@@ -124,6 +124,22 @@
     return state.clips.filter(function (c) { return !!c; }).length;
   }
 
+  // Shuffle playbackOrder (Fisher-Yates) among loaded clips.
+  function shufflePlaybackOrder() {
+    var loaded = [];
+    for (var i = 0; i < state.rankCount; i++) {
+      if (state.clips[i]) loaded.push(i);
+    }
+    for (var j = loaded.length - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var tmp = loaded[j];
+      loaded[j] = loaded[k];
+      loaded[k] = tmp;
+    }
+    state.playbackOrder = loaded;
+    state.orderCustomized = true;
+  }
+
   window.TRV = {
     state: state,
     onChange: onChange,
@@ -131,6 +147,7 @@
     titleWords: titleWords,
     getRankColor: getRankColor,
     syncPlaybackOrder: syncPlaybackOrder,
+    shufflePlaybackOrder: shufflePlaybackOrder,
     loadClip: loadClip,
     removeClip: removeClip,
     loadedClipCount: loadedClipCount
