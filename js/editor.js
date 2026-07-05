@@ -207,7 +207,8 @@
   var slotsContainer = document.getElementById('clip-slots');
   var hiddenFileInput = document.getElementById('hidden-file-input');
   var fileTargetRank = -1;
-  var slotErrors = {}; // rankIndex -> message
+  var slotErrors = {};   // rankIndex -> error message
+  var slotLoading = {};  // rankIndex -> status string while importing from a link
   var dragFromRank = -1;
   var activeClipRank = -1; // currently highlighted clip
 
@@ -300,11 +301,48 @@
     slot.appendChild(header);
 
     if (!clip) {
+      if (slotLoading[rankIndex]) {
+        // Importing from a link — show a busy state instead of the drop zone.
+        var busy = document.createElement('div');
+        busy.className = 'drop-zone loading';
+        busy.innerHTML = '<span class="spinner"></span>' +
+          '<strong>' + escapeHtml(slotLoading[rankIndex]) + '</strong><br>' +
+          '<span class="dz-sub">Importing clip for rank #' + (rankIndex + 1) + '</span>';
+        slot.appendChild(busy);
+        slotsContainer.appendChild(slot);
+        return;
+      }
+
+      // --- Link import row ---
+      var linkRow = document.createElement('div');
+      linkRow.className = 'link-row';
+      var linkInput = document.createElement('input');
+      linkInput.type = 'text';
+      linkInput.className = 'input link-input';
+      linkInput.placeholder = 'Paste a TikTok link…';
+      var linkBtn = document.createElement('button');
+      linkBtn.type = 'button';
+      linkBtn.className = 'btn-link';
+      linkBtn.textContent = '⬇ Import';
+      function submitLink() { handleLink(rankIndex, linkInput.value); }
+      linkBtn.addEventListener('click', submitLink);
+      linkInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); submitLink(); }
+      });
+      linkRow.appendChild(linkInput);
+      linkRow.appendChild(linkBtn);
+      slot.appendChild(linkRow);
+
+      var orSep = document.createElement('div');
+      orSep.className = 'or-sep';
+      orSep.textContent = 'or';
+      slot.appendChild(orSep);
+
       var dz = document.createElement('div');
       dz.className = 'drop-zone';
       dz.innerHTML = '<span class="dz-icon">📥</span>' +
         '<strong>Drop a clip here</strong> or click to browse<br>MP4 / WebM, the clip for rank #' + (rankIndex + 1) +
-        (slotErrors[rankIndex] ? '<span class="dz-error">⚠ ' + slotErrors[rankIndex] + '</span>' : '');
+        (slotErrors[rankIndex] ? '<span class="dz-error">⚠ ' + escapeHtml(slotErrors[rankIndex]) + '</span>' : '');
       dz.addEventListener('click', function () {
         fileTargetRank = rankIndex;
         hiddenFileInput.value = '';
@@ -392,6 +430,12 @@
     }
   }
 
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
   function handleFile(rankIndex, file) {
     delete slotErrors[rankIndex];
     if (!/^video\//.test(file.type) && !/\.(mp4|webm|mov|m4v)$/i.test(file.name)) {
@@ -404,6 +448,24 @@
       TRV.emitChange();
     }).catch(function (err) {
       slotErrors[rankIndex] = err.message || 'Cannot load this clip.';
+      buildSlots();
+    });
+  }
+
+  // Import a clip from a pasted link (TikTok): download no-watermark, then reuse handleFile.
+  function handleLink(rankIndex, url) {
+    delete slotErrors[rankIndex];
+    slotLoading[rankIndex] = 'Resolving link…';
+    buildSlots();
+    TRV.importFromLink(url, function (status) {
+      slotLoading[rankIndex] = status;
+      buildSlots();
+    }).then(function (file) {
+      delete slotLoading[rankIndex];
+      handleFile(rankIndex, file);
+    }).catch(function (err) {
+      delete slotLoading[rankIndex];
+      slotErrors[rankIndex] = err.message || 'Could not import from that link.';
       buildSlots();
     });
   }

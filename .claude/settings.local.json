@@ -12,7 +12,8 @@
       "PowerShell(Copy-Item \"$env:USERPROFILE\\\\Downloads\\\\ranking-most-extreme-weather.mp4\" \"D:\\\\PROGETTI\\\\TopFratmRanks\\\\__test-output.mp4\"; $b = [IO.File]::ReadAllBytes\\(\"D:\\\\PROGETTI\\\\TopFratmRanks\\\\__test-output.mp4\"\\)[0..15]; \\($b | ForEach-Object { $_.ToString\\('X2'\\) }\\) -join ' ')",
       "PowerShell(git commit -q -m \"feat: Clip Size setting \\(fit whole clip / fill width\\) with fit as default\")",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(rm -f ~/Downloads/ranking-top-3-tiktok-test.mp4)"
     ]
   }
 }
