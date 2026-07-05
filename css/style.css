@@ -719,3 +719,117 @@ textarea.input { resize: vertical; min-height: 54px; }
   .editor-sidebar { width: 100%; min-width: 0; }
   .preview-panel { min-height: 70vh; }
 }
+
+/* ============ Terms & Conditions Modal ============ */
+.terms-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 20, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.terms-card {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.terms-card h2 {
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  text-align: center;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.terms-intro {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin-bottom: 16px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.terms-scrollbox {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  overflow-y: auto;
+  max-height: 320px;
+  margin-bottom: 20px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text);
+  flex-grow: 1;
+}
+
+.terms-scrollbox h3 {
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 14px 0 6px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+.terms-scrollbox h3:first-child {
+  margin-top: 0;
+}
+
+.terms-scrollbox p {
+  margin-bottom: 10px;
+}
+
+.terms-scrollbox p:last-child {
+  margin-bottom: 0;
+}
+
+.terms-scrollbox ul {
+  margin: 8px 0 8px 18px;
+}
+
+.terms-scrollbox li {
+  margin-bottom: 6px;
+}
+
+.terms-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  margin-bottom: 22px;
+  user-select: none;
+}
+
+.terms-checkbox-label input {
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.terms-checkbox-label:hover {
+  color: var(--text);
+}
+
+.terms-btn {
+  width: 100%;
+}
