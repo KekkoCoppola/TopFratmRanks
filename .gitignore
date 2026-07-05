@@ -1,0 +1,11 @@
+# AI Development tools
+.claude/
+.agents/
+.gemini/
+docs/superpowers/
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
