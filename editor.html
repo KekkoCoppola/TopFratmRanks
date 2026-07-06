@@ -169,11 +169,13 @@
           <div class="section-header" data-section="clips">
             <h2>🎬 Clips</h2>
             <div class="section-header-actions">
-              <button class="btn-shuffle" id="btn-shuffle" type="button" title="Shuffle clip order">🔀 Shuffle</button>
+              <button class="btn-shuffle" id="btn-shuffle" type="button" title="Shuffle the play order (rank numbers stay put)">🔀 Shuffle</button>
+              <button class="btn-shuffle" id="btn-order-reset" type="button" title="Restore the default play order: last place first, #1 last">↺ Reset</button>
               <span class="chevron">▼</span>
             </div>
           </div>
           <div class="section-body">
+            <p class="playback-hint">Cards are in <strong>play order</strong> — drag them to change it. Use the <strong>Rank #</strong> menu on a card to change which number it reveals.</p>
             <div id="clip-slots"></div>
           </div>
         </section>

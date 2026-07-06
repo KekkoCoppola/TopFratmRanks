@@ -205,80 +205,102 @@
   var fileTargetRank = -1;
   var slotErrors = {};   // rankIndex -> error message
   var slotLoading = {};  // rankIndex -> status string while importing from a link
-  var dragFromRank = -1;
+  var dragFromPos = -1;  // playback position being dragged
   var activeClipRank = -1; // currently highlighted clip
 
+  // Cards are listed in PLAY ORDER (drag to reorder); empty ranks follow below.
   function buildSlots() {
     slotsContainer.innerHTML = '';
-    for (var i = 0; i < state.rankCount; i++) buildSlot(i);
+    state.playbackOrder.forEach(function (rankIndex, pos) {
+      if (state.clips[rankIndex]) buildSlot(rankIndex, pos);
+    });
+    for (var i = 0; i < state.rankCount; i++) {
+      if (!state.clips[i]) buildSlot(i, -1);
+    }
   }
 
-  function buildSlot(rankIndex) {
+  function buildSlot(rankIndex, playPos) {
     var clip = state.clips[rankIndex];
     var slot = document.createElement('div');
     slot.className = 'clip-slot';
     if (rankIndex === activeClipRank) slot.classList.add('clip-active');
 
-    // Make loaded clips draggable for reordering
+    // Loaded cards drag to change the PLAY order (rank numbers stay put).
     if (clip) {
       slot.draggable = true;
-      slot.dataset.rank = rankIndex;
 
       slot.addEventListener('dragstart', function (e) {
-        dragFromRank = rankIndex;
+        dragFromPos = playPos;
         slot.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
         // Set minimal drag data so the browser allows dragging
-        e.dataTransfer.setData('text/plain', '' + rankIndex);
+        e.dataTransfer.setData('text/plain', '' + playPos);
       });
       slot.addEventListener('dragend', function () {
         slot.classList.remove('dragging');
-        dragFromRank = -1;
-        // Clean up all drag-over states
+        dragFromPos = -1;
         slotsContainer.querySelectorAll('.drag-over').forEach(function (el) {
           el.classList.remove('drag-over');
         });
       });
+      slot.addEventListener('dragover', function (e) {
+        if (dragFromPos < 0 || dragFromPos === playPos) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        slot.classList.add('drag-over');
+      });
+      slot.addEventListener('dragleave', function () {
+        slot.classList.remove('drag-over');
+      });
+      slot.addEventListener('drop', function (e) {
+        e.preventDefault();
+        slot.classList.remove('drag-over');
+        if (dragFromPos < 0 || dragFromPos === playPos) return;
+        TRV.movePlayback(dragFromPos, playPos);
+        dragFromPos = -1;
+        buildSlots();
+        TRV.emitChange();
+      });
     }
-
-    // All slots (even empty) can be drop targets
-    slot.addEventListener('dragover', function (e) {
-      if (dragFromRank < 0 || dragFromRank === rankIndex) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      slot.classList.add('drag-over');
-    });
-    slot.addEventListener('dragleave', function () {
-      slot.classList.remove('drag-over');
-    });
-    slot.addEventListener('drop', function (e) {
-      e.preventDefault();
-      slot.classList.remove('drag-over');
-      if (dragFromRank < 0 || dragFromRank === rankIndex) return;
-      // Swap the two clips
-      var tmp = state.clips[dragFromRank];
-      state.clips[dragFromRank] = state.clips[rankIndex];
-      state.clips[rankIndex] = tmp;
-      // Swap custom colors too
-      var tmpColor = state.rankCustomColors[dragFromRank];
-      state.rankCustomColors[dragFromRank] = state.rankCustomColors[rankIndex];
-      state.rankCustomColors[rankIndex] = tmpColor;
-      // Swap slot errors
-      var tmpErr = slotErrors[dragFromRank];
-      slotErrors[dragFromRank] = slotErrors[rankIndex];
-      slotErrors[rankIndex] = tmpErr;
-      TRV.syncPlaybackOrder();
-      dragFromRank = -1;
-      buildSlots();
-      TRV.emitChange();
-    });
 
     var header = document.createElement('div');
     header.className = 'clip-slot-header';
-    var title = document.createElement('span');
-    title.className = 'slot-title';
-    title.innerHTML = 'Rank <span class="slot-num">#' + (rankIndex + 1) + '</span>';
-    header.appendChild(title);
+    if (clip) {
+      // Rank is chosen from a dropdown: pick 1..N, swaps with the occupant.
+      var rankSelect = document.createElement('select');
+      rankSelect.className = 'rank-select';
+      rankSelect.title = 'Change the rank number of this clip';
+      for (var r = 0; r < state.rankCount; r++) {
+        var opt = document.createElement('option');
+        opt.value = r;
+        opt.textContent = 'Rank #' + (r + 1);
+        rankSelect.appendChild(opt);
+      }
+      rankSelect.value = rankIndex;
+      rankSelect.addEventListener('click', function (e) { e.stopPropagation(); });
+      rankSelect.addEventListener('change', function () {
+        var toRank = parseInt(rankSelect.value, 10);
+        TRV.setClipRank(rankIndex, toRank);
+        if (activeClipRank === rankIndex) activeClipRank = toRank;
+        else if (activeClipRank === toRank) activeClipRank = rankIndex;
+        buildSlots();
+        TRV.emitChange();
+      });
+      header.appendChild(rankSelect);
+    } else {
+      var title = document.createElement('span');
+      title.className = 'slot-title';
+      title.innerHTML = 'Rank <span class="slot-num">#' + (rankIndex + 1) + '</span>';
+      header.appendChild(title);
+    }
+    // Play-order badge: rank number and play position are two different things.
+    if (clip && playPos !== -1) {
+      var badge = document.createElement('span');
+      badge.className = 'play-order-badge';
+      badge.title = 'This clip plays ' + ordinal(playPos + 1) + ' in the video';
+      badge.textContent = '▶ ' + ordinal(playPos + 1);
+      header.appendChild(badge);
+    }
     if (clip) {
       var removeBtn = document.createElement('button');
       removeBtn.type = 'button';
@@ -471,12 +493,32 @@
     if (file && fileTargetRank >= 0) handleFile(fileTargetRank, file);
   });
 
-  /* ---------- shuffle button ---------- */
+  /* ---------- play order: shuffle + reset ---------- */
+  function ordinal(n) {
+    var mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 13) return n + 'th';
+    switch (n % 10) {
+      case 1: return n + 'st';
+      case 2: return n + 'nd';
+      case 3: return n + 'rd';
+      default: return n + 'th';
+    }
+  }
+
   var shuffleBtn = document.getElementById('btn-shuffle');
   shuffleBtn.addEventListener('click', function (e) {
     e.stopPropagation(); // don't toggle the collapsible section
     if (TRV.loadedClipCount() < 2) return;
     TRV.shufflePlaybackOrder();
+    buildSlots(); // refresh the play-order badges
+    TRV.emitChange();
+  });
+
+  var orderResetBtn = document.getElementById('btn-order-reset');
+  orderResetBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    TRV.resetPlaybackOrder();
+    buildSlots();
     TRV.emitChange();
   });
 

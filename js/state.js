@@ -126,6 +126,30 @@
     return state.clips.filter(function (c) { return !!c; }).length;
   }
 
+  // Reassign a clip to a different rank number (the label/number it reveals).
+  // If the target rank is occupied the two clips swap ranks.
+  // Play positions are preserved: only the rank indexes are remapped.
+  function setClipRank(fromRank, toRank) {
+    if (fromRank === toRank || !state.clips[fromRank]) return;
+    var moving = state.clips[fromRank];
+    state.clips[fromRank] = state.clips[toRank] || null;
+    state.clips[toRank] = moving;
+    state.playbackOrder = state.playbackOrder.map(function (ri) {
+      if (ri === fromRank) return toRank;
+      if (ri === toRank) return fromRank;
+      return ri;
+    });
+  }
+
+  // Move a clip within the play sequence (drag & drop of the clip cards).
+  function movePlayback(fromPos, toPos) {
+    if (fromPos === toPos || fromPos < 0 || toPos < 0 ||
+        fromPos >= state.playbackOrder.length || toPos >= state.playbackOrder.length) return;
+    var moved = state.playbackOrder.splice(fromPos, 1)[0];
+    state.playbackOrder.splice(toPos, 0, moved);
+    state.orderCustomized = true;
+  }
+
   // Shuffle playbackOrder (Fisher-Yates) among loaded clips.
   function shufflePlaybackOrder() {
     var loaded = [];
@@ -142,6 +166,12 @@
     state.orderCustomized = true;
   }
 
+  // Back to the default countdown order (#N first, #1 last).
+  function resetPlaybackOrder() {
+    state.orderCustomized = false;
+    syncPlaybackOrder();
+  }
+
   window.TRV = {
     state: state,
     onChange: onChange,
@@ -150,6 +180,9 @@
     getRankColor: getRankColor,
     syncPlaybackOrder: syncPlaybackOrder,
     shufflePlaybackOrder: shufflePlaybackOrder,
+    setClipRank: setClipRank,
+    movePlayback: movePlayback,
+    resetPlaybackOrder: resetPlaybackOrder,
     loadClip: loadClip,
     removeClip: removeClip,
     loadedClipCount: loadedClipCount
