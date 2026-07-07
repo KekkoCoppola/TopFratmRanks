@@ -162,13 +162,19 @@
   setupInput.addEventListener('input', function () { setupError.style.display = 'none'; });
 
   /* ---------- publish button state ---------- */
+  var generatingForPublish = false;
+
   function updatePublishButton() {
     var hasVideo = !!TRV.lastExport;
     var confOk = TRV.youtube.isConfigured();
-    publishBtn.disabled = uploading || !hasVideo || !confOk;
+    var canGenerate = TRV.loadedClipCount() >= 1;
+    var busy = uploading || generatingForPublish || (TRV.isGenerating && TRV.isGenerating());
+    publishBtn.disabled = busy || !confOk || (!hasVideo && !canGenerate);
+    publishBtn.textContent = generatingForPublish ? '⏳ Generating…' : '📤 Publish';
     publishBtn.title = !confOk ? 'Set up publishing first (📤 Publishing section in the sidebar)'
-      : !hasVideo ? 'Generate the video first'
-      : 'Publish the generated video to YouTube';
+      : (!hasVideo && !canGenerate) ? 'Load at least one clip first'
+      : hasVideo ? 'Publish the generated video to YouTube'
+      : 'Generates the video, then publishes it to YouTube';
   }
 
   TRV.onChange(updatePublishButton);
@@ -277,6 +283,20 @@
 
   publishBtn.addEventListener('click', function () {
     if (publishBtn.disabled) return;
-    openModal();
+    if (TRV.lastExport) {
+      openModal();
+      return;
+    }
+    generatingForPublish = true;
+    updatePublishButton();
+    TRV.runGenerate().then(function () {
+      generatingForPublish = false;
+      updatePublishButton();
+      openModal();
+    }).catch(function () {
+      generatingForPublish = false;
+      updatePublishButton();
+      // failure is already shown in the Generate progress area
+    });
   });
 })();

@@ -451,6 +451,22 @@ input[type="color"] {
 }
 .btn-shuffle:hover { background: var(--accent); border-color: var(--accent); color: #fff; transform: translateY(-1px); }
 
+/* ---- Add rank button ---- */
+.btn-add-rank {
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  border-radius: 10px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.btn-add-rank:hover:not(:disabled) { background: rgba(79, 124, 255, 0.08); border-color: var(--accent); color: var(--accent); }
+.btn-add-rank:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* ---- Publishing ---- */
 .publish-warning {
   background: rgba(255, 84, 112, 0.08);

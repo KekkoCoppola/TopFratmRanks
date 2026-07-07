@@ -5,8 +5,11 @@
   var state = TRV.state;
 
   /* ---------- header ---------- */
-  document.getElementById('rank-display').textContent = 'Ranking: Top ' + state.rankCount;
-  document.title = 'TopRankVids — Top ' + state.rankCount + ' Editor';
+  function refreshRankHeader() {
+    document.getElementById('rank-display').textContent = 'Ranking: Top ' + state.rankCount;
+    document.title = 'TopRankVids — Top ' + state.rankCount + ' Editor';
+  }
+  refreshRankHeader();
 
   /* ---------- collapsible sections ---------- */
   document.querySelectorAll('.section-header').forEach(function (header) {
@@ -316,6 +319,18 @@
       });
       header.appendChild(removeBtn);
     }
+    if (state.rankCount > 1) {
+      var removeRankBtn = document.createElement('button');
+      removeRankBtn.type = 'button';
+      removeRankBtn.className = 'btn-icon';
+      removeRankBtn.textContent = '✕';
+      removeRankBtn.title = 'Remove this rank entirely';
+      removeRankBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        removeRankUI(rankIndex);
+      });
+      header.appendChild(removeRankBtn);
+    }
     slot.appendChild(header);
 
     if (!clip) {
@@ -493,6 +508,40 @@
     if (file && fileTargetRank >= 0) handleFile(fileTargetRank, file);
   });
 
+  /* ---------- add / remove whole rank slots ---------- */
+  var addRankBtn = document.getElementById('btn-add-rank');
+
+  function updateAddRankButton() {
+    addRankBtn.disabled = state.rankCount >= TRV.MAX_RANKS;
+    addRankBtn.title = addRankBtn.disabled ? 'Maximum of ' + TRV.MAX_RANKS + ' ranks' : '';
+  }
+
+  function afterRankStructureChange() {
+    // Indexes shifted: stale per-slot UI state no longer maps to the right rank.
+    slotErrors = {};
+    slotLoading = {};
+    refreshRankHeader();
+    if (state.rankColorMode === 'custom') rebuildRankCustomColors();
+    buildSlots();
+    updateAddRankButton();
+    TRV.emitChange();
+  }
+
+  addRankBtn.addEventListener('click', function () {
+    if (TRV.addRank()) afterRankStructureChange();
+  });
+
+  function removeRankUI(rankIndex) {
+    if (state.rankCount <= 1) return;
+    var clip = state.clips[rankIndex];
+    if (clip && !window.confirm('Remove rank #' + (rankIndex + 1) + ' and its loaded clip? This cannot be undone.')) {
+      return;
+    }
+    if (activeClipRank === rankIndex) activeClipRank = -1;
+    else if (activeClipRank > rankIndex) activeClipRank--;
+    if (TRV.removeRank(rankIndex)) afterRankStructureChange();
+  }
+
   /* ---------- play order: shuffle + reset ---------- */
   function ordinal(n) {
     var mod100 = n % 100;
@@ -530,41 +579,57 @@
   var exporting = false;
 
   function updateExportButton() {
-    var allLoaded = TRV.loadedClipCount() === state.rankCount;
-    exportBtn.disabled = exporting || !allLoaded;
+    var loadedCount = TRV.loadedClipCount();
+    var allLoaded = loadedCount === state.rankCount;
+    var canExport = loadedCount >= 1;
+    exportBtn.disabled = exporting || !canExport;
     exportBtn.textContent = exporting ? '⏳ Generating…'
       : allLoaded ? '🚀 Generate Video Ranking'
-      : '🚀 Generate (' + TRV.loadedClipCount() + '/' + state.rankCount + ' clips loaded)';
+      : '🚀 Generate (' + loadedCount + '/' + state.rankCount + ' clips loaded)';
   }
 
-  exportBtn.addEventListener('click', function () {
-    if (exporting) return;
+  // Shared by the Generate button and the Publish button (which generates first
+  // if there's no video yet). Rejects if a generation is already running.
+  function runGenerate() {
+    if (exporting) return Promise.reject(new Error('A generation is already in progress.'));
     exporting = true;
     if (TRV.preview.isPlaying()) TRV.preview.stop();
     updateExportButton();
     exportProgress.classList.add('visible');
     exportStatus.classList.remove('error');
 
-    TRV.exportVideo(function (p) {
+    return TRV.exportVideo(function (p) {
       exportFill.style.width = Math.round((p.pct || 0) * 100) + '%';
       exportStatus.textContent = p.stage || '';
     }).then(function (result) {
       exportFill.style.width = '100%';
       exportStatus.textContent = '✅ Done! Downloaded ' + result.filename;
-    }).catch(function (err) {
+      exporting = false;
+      updateExportButton();
+      return result;
+    }, function (err) {
       console.error(err);
       exportStatus.classList.add('error');
       exportStatus.textContent = '⚠ Export failed: ' + (err.message || err);
-    }).finally(function () {
       exporting = false;
       updateExportButton();
+      throw err;
     });
+  }
+
+  exportBtn.addEventListener('click', function () {
+    if (exporting) return;
+    runGenerate().catch(function () { /* already surfaced in exportStatus */ });
   });
+
+  TRV.runGenerate = runGenerate;
+  TRV.isGenerating = function () { return exporting; };
 
   TRV.onChange(updateExportButton);
 
   /* ---------- boot ---------- */
   buildSlots();
   updateExportButton();
+  updateAddRankButton();
   loadFontThenRedraw(state.title.font);
 })();

@@ -126,6 +126,36 @@
     return state.clips.filter(function (c) { return !!c; }).length;
   }
 
+  var MAX_RANKS = 10;
+
+  // Append a new empty rank slot at the end. Returns false if already at the cap.
+  function addRank() {
+    if (state.rankCount >= MAX_RANKS) return false;
+    state.clips.push(null);
+    state.rankCustomColors.push('#FFD700');
+    state.rankCount++;
+    syncPlaybackOrder();
+    return true;
+  }
+
+  // Remove a rank slot entirely (not just its clip), compacting the ranks above it
+  // down by one so numbering stays contiguous. Returns false if it's the last rank.
+  function removeRank(rankIndex) {
+    if (state.rankCount <= 1) return false;
+    var clip = state.clips[rankIndex];
+    if (clip) {
+      clip.video.pause();
+      URL.revokeObjectURL(clip.url);
+    }
+    state.clips.splice(rankIndex, 1);
+    state.rankCustomColors.splice(rankIndex, 1);
+    state.rankCount--;
+    state.playbackOrder = state.playbackOrder
+      .filter(function (ri) { return ri !== rankIndex; })
+      .map(function (ri) { return ri > rankIndex ? ri - 1 : ri; });
+    return true;
+  }
+
   // Reassign a clip to a different rank number (the label/number it reveals).
   // If the target rank is occupied the two clips swap ranks.
   // Play positions are preserved: only the rank indexes are remapped.
@@ -185,6 +215,9 @@
     resetPlaybackOrder: resetPlaybackOrder,
     loadClip: loadClip,
     removeClip: removeClip,
-    loadedClipCount: loadedClipCount
+    loadedClipCount: loadedClipCount,
+    addRank: addRank,
+    removeRank: removeRank,
+    MAX_RANKS: MAX_RANKS
   };
 })();
