@@ -27,7 +27,7 @@ Il kit copiato è il **kit 1.1** (temi): `js/theme.js` del kit va nel `<head>` p
 | Parete | `body` di `family.css` | il `body` è una colonna: sulle pagine corte il footer resta in fondo alla parete |
 | Topbar | `.ss-topbar`: wordmark ScrollStudio (doppio, `.ss-only-light` / `.ss-only-dark`) → `https://kekkocoppola.github.io/ScrollStudio/`, barra obliqua, avatar + **TopFratmRanks** → `index.html`, switch lingua, switch tema `.ss-theme` | niente nav: i due switch vanno a destra (N15); su telefono lo switch tema è la seconda riga, a destra |
 | Titolo pagina | `.ss-head` | landing: "Crea video classifica TikTok in pochi secondi"; editor: "Crea la tua classifica" + descrizione |
-| Editor | `.ss-editor` = `.ss-panel` + `.ss-stage` | sotto 860px lo stage va sopra il pannello |
+| Editor | `.ss-editor` = `.ss-panel` + `.ss-stage` | sopra 860px pannello e stage sono un gruppo centrato sotto il titolo, con lo stage largo al massimo quanto la timeline (N16); sotto 860px lo stage va sopra il pannello |
 | Footer | `.ss-footer` | wordmark (doppio, come in topbar) + © 2026 |
 | Favicon | `assets/topfratmranks-logo.svg` | lo stesso avatar della card dell'hub |
 
@@ -75,6 +75,7 @@ Ricette in coda a `css/family.css`, valori solo da `css/tokens.css`. Derivati co
 | N13 | `.ss-account` (`__avatar`, `__name`) + `.ss-icon-btn--bare` | canale YouTube collegato, con "Disconnetti" | `.ss-topbar__product` | Pubblicazione |
 | N14 | `.ss-check`, `.ss-check-label` | casella "ho letto e accetto" (dichiarazione, non impostazione) | `.ss-switch` | Termini |
 | N15 | stati e casi mancanti | topbar senza nav; hover di swatch e switch; `.ss-icon-btn:disabled`; area cliccabile di 30px della timeline senza segmenti; tempo accanto al Play senza velocità; opzioni del segmented con icona (B/I); evidenza con inchiostro in hint, note e modali; badge con icona | componenti del kit | varie |
+| N16 | `.ss-editor` su schermi larghi (`--stage-w`) | pannello + stage come un gruppo centrato: la colonna dello stage si ferma alla larghezza della timeline, così l'anteprima non resta lontana dai comandi e fuori asse rispetto al titolo | `.ss-editor` | Editor, sopra 860px |
 
 ### Scelte dell'app che si discostano dal kit (decise dall'utente)
 

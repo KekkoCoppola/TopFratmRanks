@@ -155,4 +155,5 @@
 
 :root {
   --panel-w: 340px; /* widest settings sheet: the max column of .ss-editor's panel in family.css; the landing uses the same sheet */
+  --stage-w: 560px; /* widest stage column on wide screens: the max-width of .ss-timeline in family.css */
 }

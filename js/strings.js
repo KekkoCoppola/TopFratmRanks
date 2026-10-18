@@ -138,8 +138,13 @@
     sessionExpired: { it: 'Sessione scaduta: nuovo accesso…', en: 'Session expired — signing in again…' }
   };
 
+  // i18n.js sends its first "ss:lang" (saved English) before it defines window.ssLang,
+  // so keep the event's language too: this listener is the first one, it runs before the re-renders
+  var current = 'it';
+  document.addEventListener('ss:lang', function (e) { current = e.detail.lang; });
+
   function lang() {
-    return window.ssLang ? window.ssLang() : 'it';
+    return window.ssLang ? window.ssLang() : current;
   }
 
   // t('rankDisplay', { n: 5 }) -> "Classifica: Top 5"
