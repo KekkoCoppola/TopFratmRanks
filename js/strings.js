@@ -66,6 +66,7 @@
       en: 'Set up publishing first (Publishing section in the panel)'
     },
     publishTitleNoClip: { it: 'Prima carica almeno una clip', en: 'Load at least one clip first' },
+    publishTitleSoon: { it: 'La pubblicazione non è ancora disponibile', en: 'Publishing is not available yet' },
     publishTitleReady: { it: 'Pubblica su YouTube il video generato', en: 'Publish the generated video to YouTube' },
     publishTitleGenerate: { it: 'Genera il video, poi lo pubblica su YouTube', en: 'Generates the video, then publishes it to YouTube' },
     notConnected: { it: 'Non collegato', en: 'Not connected' },
