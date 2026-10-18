@@ -4,12 +4,14 @@ Kit per ridisegnare le app figlie (TopFratmRanks, Bouncical, i prossimi tool) ne
 
 | File | Cosa |
 |---|---|
-| `FAMILY-DESIGN.md` | regole, componenti, procedura per i componenti nuovi, divieti, checklist |
-| `tokens.css` · `family.css` · `i18n.js` | codice pronto da copiare nell'app |
-| `specimen.html` | tutti i componenti in una schermata editor (aprila con il server dell'hub: `/design-kit/specimen.html`) |
-| `reference/` | screenshot dell'hub e dello specimen, desktop e telefono |
-| `assets/` | wordmark, logo e poster usati dallo specimen |
-| `PROMPT.md` | il primo messaggio da dare all'agente nel progetto figlio |
+| `FAMILY-DESIGN.md` | regole, componenti, procedura per i componenti nuovi, temi, divieti, checklist |
+| `tokens.css` · `family.css` · `i18n.js` · `theme.js` | codice pronto da copiare nell'app |
+| `CHANGELOG.md` | versioni del kit (la versione è anche in testa a `tokens.css` e `family.css`) |
+| `specimen.html` | tutti i componenti in una schermata editor, con lo switch del tema (aprila con il server dell'hub: `/design-kit/specimen.html`) |
+| `reference/` | screenshot dell'hub e dello specimen, desktop e telefono (tema chiaro) |
+| `assets/` | wordmark (chiaro e scuro), logo e poster usati dallo specimen |
+| `PROMPT.md` | il primo messaggio da dare all'agente nel progetto figlio (redesign) |
+| `THEME-ADOPTION.md` · `PROMPT-THEME-APP.md` | guida e prompt per portare il tema scuro in un'app già ridisegnata con il kit 1.0 |
 
 ## Procedura per ogni progetto figlio
 

@@ -11,7 +11,7 @@ Devi fare il redesign grafico di **{PROGETTO}** perché diventi un'app figlia di
 Il design system è in `design/scrollstudio-kit/`. Leggi **tutto** prima di fare qualsiasi cosa:
 
 - `FAMILY-DESIGN.md`: regole, ruoli, procedura per i componenti nuovi, divieti, checklist. È la fonte di verità.
-- `tokens.css`, `family.css`, `i18n.js`: codice da copiare nell'app **senza modificarlo** (le aggiunte vanno in coda, con commento).
+- `tokens.css`, `family.css`, `i18n.js`, `theme.js`: codice da copiare nell'app **senza modificarlo** (le aggiunte vanno in coda, con commento). Il kit ha due temi, chiaro e scuro: leggi la sezione "Temi" di `FAMILY-DESIGN.md`.
 - `specimen.html`: tutti i componenti montati in una schermata editor reale. Aprilo nel browser.
 - `reference/*.jpg`: screenshot dell'hub e dello specimen. Guardali tutti con il tool di lettura immagini: sono il risultato da raggiungere.
 - `HUB-DESIGN.md`: il design dell'hub, da cui nasce tutto.
@@ -41,15 +41,15 @@ Il kit ha la precedenza su qualunque skill, plugin, hook o preferenza di design 
 5. **STOP**: mandami il piano e aspetta la mia approvazione.
 
 ### Fase 2: fondamenta
-1. Copia `tokens.css`, `family.css` e `i18n.js` nell'app, collega Urbanist 300/400, togli i vecchi font e colori globali.
-2. Rifai la cornice: parete, topbar (wordmark ScrollStudio → hub, avatar + nome del prodotto, switch lingua), titolo della pagina, layout editor con l'anteprima appesa alla parete, footer.
+1. Copia `tokens.css`, `family.css`, `i18n.js`, `theme.js` e `assets/scrollstudio-wordmark-light.svg` nell'app, collega Urbanist 300/400, togli i vecchi font e colori globali. `theme.js` va nel `<head>`, sincrono, dopo `<meta name="theme-color">` e prima dei CSS (markup esatto in `THEME-ADOPTION.md`, punto 2).
+2. Rifai la cornice: parete, topbar (wordmark ScrollStudio → hub, doppio: uno per tema; avatar + nome del prodotto, switch lingua, switch tema), titolo della pagina, layout editor con l'anteprima appesa alla parete, footer.
 3. Screenshot a 1366×768 e 375×667, messi accanto a `reference/hub-desktop.jpg` e `reference/specimen-desktop.jpg`. Elenca almeno 3 differenze che vedi e correggile prima di mostrarmeli.
 4. **STOP**: mandami gli screenshot e aspetta l'ok.
 
 ### Fase 3: componenti, a gruppi
 Lavora un gruppo alla volta (es. campi → bottoni → lista clip → timeline → modali → export). Dopo ogni gruppo:
 - screenshot di tutti gli stati (riposo, hover, focus, attivo, disattivo, trascinamento, errore);
-- controllo con la checklist di `FAMILY-DESIGN.md`;
+- controllo con la checklist di `FAMILY-DESIGN.md`, in tema chiaro e scuro;
 - autocritica: cosa sembra "generico" o diverso dallo specimen? Correggi;
 - un componente `NUOVO` va in `family.css` dell'app con prefisso `ss-` e una riga nella tabella dei componenti.
 

@@ -4,16 +4,16 @@ Regole per ridisegnare le app figlie di ScrollStudio (Bouncical, TopFratmRanks, 
 
 ## Fonte di verità e precedenza
 
-1. `tokens.css` e `family.css`: codice da copiare **così com'è** nell'app. Valori, nomi e ricette vengono da qui, non da stime.
+1. `tokens.css`, `family.css`, `i18n.js`, `theme.js`: codice da copiare **così com'è** nell'app. Valori, nomi e ricette vengono da qui, non da stime. La versione del kit è nel commento in testa a `tokens.css` e `family.css`; cosa cambia fra una versione e l'altra è in `CHANGELOG.md`.
 2. Questo file: regole, ruoli e procedura per i componenti che il kit non ha ancora.
-3. `specimen.html` e `reference/*.jpg`: come deve apparire il risultato. In caso di dubbio, si confronta con le immagini.
+3. `specimen.html` e `reference/*.jpg`: come deve apparire il risultato. In caso di dubbio, si confronta con le immagini (sono tutte nel tema chiaro; lo specimen ha lo switch per vedere lo scuro).
 4. `HUB-DESIGN.md` (copia del `DESIGN.md` dell'hub, la crea la procedura in `README.md`): da dove nasce tutto (la GIF di riferimento, la stanza, le misure).
 
 Il kit vince su qualunque altra guida di design: skill, preset, gusti dell'agente, "best practice" generiche. Se una regola qui sembra sbagliata, si chiede all'utente, non la si aggira.
 
 ## Principi (dall'hub)
 
-- **Galleria in una stanza.** La pagina è una parete grigio chiaro (`--wall-*`). Ciò che si guarda (l'anteprima del video) è un quadro appeso alla parete: carta, angoli 4px, ombra larga verso il basso, luce chiara dietro. I comandi stanno su fogli di carta (`--paper`) appoggiati sulla parete.
+- **Galleria in una stanza.** La pagina è una parete grigio chiaro (`--wall-*`; grafite nel tema scuro, vedi "Temi"). Ciò che si guarda (l'anteprima del video) è un quadro appeso alla parete: carta, angoli 4px, ombra larga verso il basso, luce chiara dietro. I comandi stanno su fogli di carta (`--paper`) appoggiati sulla parete.
 - **Silenzio cromatico.** L'interfaccia è monocroma: inchiostri grigi su carta e parete. Il colore arriva solo dal contenuto (video, miniature, colori scelti dall'utente) e dal **corallo**, riservato all'unica azione principale della vista (Esporta, Crea, Pubblica) e al pallino degli errori.
 - **Testo sottile e piccolo.** Urbanist 300 per titoli, nomi e numeri grandi; 400 per il resto. Mai grassetto: si mette in evidenza con dimensione e inchiostro (`--ink-900` contro `--ink-700`), non con il peso.
 - **Profondità morbida.** Niente bordi intorno ai blocchi: la separazione la danno ombra e spazio. Le linee sottili (`--hairline`, `--track`) servono solo per dividere sezioni e per le tracce (slider, timeline, progress).
@@ -25,16 +25,17 @@ Il kit vince su qualunque altra guida di design: skill, preset, gusti dell'agent
 | Elemento | Ricetta | Note |
 |---|---|---|
 | Parete | `body` di `family.css` | sfumatura dall'alto, fissa |
-| Topbar | `.ss-topbar`: wordmark ScrollStudio (link all'hub) · barra obliqua · avatar + nome del prodotto · nav · switch lingua | il wordmark non scende sotto i 30px di altezza |
+| Topbar | `.ss-topbar`: wordmark ScrollStudio (link all'hub) · barra obliqua · avatar + nome del prodotto · nav · switch lingua · switch tema | il wordmark non scende sotto i 30px di altezza; è un `<img>` doppio, uno per tema (vedi "Temi") |
 | Titolo della pagina | `.ss-head`: titolo `--fs-xl` 300 centrato, descrizione `--fs-sm` | stesse parole della card del prodotto nell'hub |
 | Anteprima | `.ss-stage` + `.ss-frame` 9:16 appeso alla parete | mai dentro un pannello |
 | Lingue | `.ss-lang`, italiano di default, inglese con `data-en` | stesso meccanismo dell'hub, vedi sotto |
-| Footer | `.ss-footer`: wordmark piccolo + © | |
+| Tema | `.ss-theme`, chiaro o scuro, di default quello del sistema | stesso meccanismo dell'hub, vedi "Temi" |
+| Footer | `.ss-footer`: wordmark piccolo (doppio, uno per tema) + © | |
 | Avatar del prodotto | il logo della card dell'hub (cerchio, anello sottile) | in topbar e come favicon del tool |
 
 ## Token
 
-Tutti in `tokens.css`, nessun valore scritto a mano nei componenti.
+Tutti in `tokens.css`, nessun valore scritto a mano nei componenti. I colori hanno un valore per tema (vedi "Temi"); tipo, spazi, raggi e movimento sono uguali nei due temi.
 
 | Gruppo | Token |
 |---|---|
@@ -43,6 +44,7 @@ Tutti in `tokens.css`, nessun valore scritto a mano nei componenti.
 | Inchiostri | `--ink-900` titoli/valori/attivo · `--ink-700` testo/etichette · `--ink-500` placeholder, durate, maniglie · `--hairline` · `--track` |
 | Accento | `--coral`, `--on-coral` (testo su corallo = ink-900, 5,4:1), `--on-coral-icon` (solo il glifo "+" bianco dell'hub) |
 | Focus | `--focus` (viola): anello di 2px, scostato di 4px (2px sui campi) |
+| Ruoli | `--on-ink` testo e icone su `--ink-900` pieno · `--knob` manopole · `--overlay` fondo della modale · `--stage-glow-end` coda della luce dietro lo stage · `--line-dashed` bordo di `.ss-drop` · `--swatch-ring` anello degli swatch · `--chevron`, `--check-mark` icone in data-URI |
 | Profondità | `--shadow-raise` pillole e righe · `--shadow-panel` pannelli · `--shadow-paper` quadro e modale · `--shadow-coral` azione principale |
 | Tipo | `--fs-xs` 11 · `--fs-sm` 13 · `--fs-md` 16 · `--fs-lg` 22 · `--fs-xl` 28 (22 su telefono) |
 | Forma | `--radius` 4 · `--radius-sm` 2 · `--radius-pill` |
@@ -76,7 +78,7 @@ Numeri che cambiano (tempi, percentuali, durate): `font-variant-numeric: tabular
 | Numero | `.ss-input.ss-input--num` | |
 | Colore | `.ss-swatch` (`input type=color`) | |
 | Riga impostazione | `.ss-row` > `.ss-row__label` + controllo | |
-| Interruttore | `.ss-switch` (`input type=checkbox`) | on/off |
+| Interruttore | `.ss-switch` (`input type=checkbox`) | on/off; manopola `--knob`, da acceso `--on-ink` |
 | Scelta tra 2–4 | `.ss-segmented` > `.ss-segmented__option[aria-pressed]` | stile, velocità, formato |
 | Slider | `.ss-range` (aggiornare `--p` da JS) | |
 | Pannello | `.ss-panel` > `details.ss-section` (summary + `.ss-section__body`) | impostazioni raggruppate e richiudibili |
@@ -91,6 +93,8 @@ Numeri che cambiano (tempi, percentuali, durate): `font-variant-numeric: tabular
 | Modale | `.ss-overlay` > `.ss-modal` (`__title`, `__body`, `__actions`, `__close`) | la parete si sfoca e schiarisce |
 | Passi | `ol.ss-steps` (`aria-current="step"`) | wizard |
 | Notifica | `.ss-toast` | conferme brevi |
+| Switch tema | `.ss-theme` > `.ss-theme__option[data-theme-choice][aria-pressed]` (icona sole / luna) | subito dopo `.ss-lang`; su telefono in fondo alla seconda riga |
+| Un elemento per tema | `.ss-only-light`, `.ss-only-dark` | immagini che non possono prendere il colore dal testo (wordmark) |
 
 ## Componenti nuovi: come derivarli
 
@@ -118,7 +122,8 @@ Si ridisegna l'**interfaccia**: pagine, pannelli, comandi, modali, testi dell'UI
 - Sezioni "marketing" inventate: hero con illustrazioni, griglie di feature con icone, testimonianze, CTA ripetute.
 - Testi riscritti: si tengono le parole dell'app (si possono solo sistemare refusi o tradurre). Un testo nuovo va proposto all'utente.
 - Cambiare il comportamento: stessi flussi, stesse funzioni, stessi ID e attributi letti dal JS (o il JS si aggiorna insieme).
-- Dark mode, temi, animazioni d'ingresso a cascata, parallasse.
+- Animazioni d'ingresso a cascata, parallasse.
+- Un tema che non passa dai token: blocchi `[data-theme="dark"]` sparsi nei componenti, colori scritti a mano "solo per lo scuro", `filter: invert()` sull'interfaccia.
 
 ## Lingue
 
@@ -126,9 +131,54 @@ Italiano di default. L'inglese sta sullo stesso elemento: `data-en="…"` per il
 
 Il codice è `i18n.js` del kit: si copia e si carica con `defer`. Per i testi creati dal JS (stati dell'export, errori, etichette dinamiche): un dizionario `{ it, en }` nell'app, la lingua da `window.ssLang()` e un nuovo render all'evento `ss:lang`.
 
+## Temi
+
+Due temi, chiaro (di default) e scuro: la stessa galleria, di sera. Parete grafite che sfuma dall'alto verso il basso, carta un gradino più chiara della parete, campi un gradino più scuri della carta, inchiostri chiari caldi (mai bianco puro), corallo invariato, ombre nere e più dense, nessun alone colorato.
+
+### Contratto (uguale in hub e app)
+
+| Cosa | Lingua | Tema |
+|---|---|---|
+| Attributo su `<html>` | `lang="it\|en"` | `data-theme="light\|dark"` (sempre esplicito) |
+| Chiave `localStorage` | `scrollstudio-lang` | `scrollstudio-theme` (`light` / `dark`; se manca segue `prefers-color-scheme` e i suoi cambi) |
+| Evento su `document` | `ss:lang` | `ss:theme`, `detail: { theme }` |
+| API globale | `window.ssLang()`, `window.ssSetLanguage(l)` | `window.ssTheme()`, `window.ssSetTheme(t)` |
+| Bottoni | `[data-lang]` in `.ss-lang` | `[data-theme-choice="light\|dark"]` in `.ss-theme` |
+| File del kit | `i18n.js` (`defer`) | `theme.js` (**sincrono, nel `<head>`, dopo `<meta name="theme-color">` e prima dei CSS**: niente lampo chiaro→scuro) |
+
+Hub e app stanno sullo stesso origin (`https://kekkocoppola.github.io/<repo>/`), quindi la scelta fatta nell'hub vale anche nelle app e viceversa; `theme.js` ascolta anche l'evento `storage`, così il tema cambia insieme in tutte le schede aperte. In locale ogni server ha la sua porta: la scelta non passa da un'app all'altra, è normale.
+
+`theme.js` aggiorna `<meta name="theme-color">` (il colore della barra del browser) con `--wall-top` del tema attivo: nell'HTML resta il valore chiaro. Uno switch creato dopo il caricamento (in una modale) funziona da solo, perché il click è ascoltato su `document`; deve solo nascere con l'`aria-pressed` giusto: `String(button.dataset.themeChoice === window.ssTheme())`. Il JS che disegna con i colori dell'interfaccia legge `window.ssTheme()` e ridisegna su `ss:theme`.
+
+### Token di ruolo
+
+Un valore che fa due mestieri si separa in un token di ruolo, che nel chiaro vale esattamente come prima e nello scuro prende il suo valore. Elenco completo, con i due valori, in `CHANGELOG.md`.
+
+| Token | Ruolo |
+|---|---|
+| `--on-ink` | testo e icone su superfici piene di `--ink-900` (non `--paper`: in scuro l'inchiostro è chiaro) |
+| `--knob` | manopole di switch, range e playhead |
+| `--overlay` | fondo della modale |
+| `--stage-glow-end` | coda trasparente della luce dietro lo stage |
+| `--line-dashed` | bordo tratteggiato di `.ss-drop` |
+| `--swatch-ring` | anello degli swatch colore |
+| `--chevron`, `--check-mark` | icone in data-URI: freccia del select, spunta della casella |
+
+### Regole
+
+1. **Il chiaro resta identico.** Ogni token nuovo, nel tema chiaro, vale quello che c'era prima. Il tema scuro è solo il blocco `:root[data-theme="dark"]` di `tokens.css`, che ridefinisce i token: nessun componente ha regole per tema (a parte `.ss-only-light` / `.ss-only-dark`).
+2. **Niente colori scritti a mano.** Un valore scritto in un componente è un errore anche se "in chiaro va bene": al buio resterà chiaro. Si trova con `grep -nE "#[0-9a-fA-F]{3,8}|rgb\(|%23"`; restano ammesse solo le ombre `rgb(var(--shadow-ink) / α)` (seguono `--shadow-ink`, che al buio è nero) e il contenuto.
+3. **Icone in data-URI.** `currentColor` non funziona dentro `background-image`, quindi il colore è scritto nell'URI: l'intero `url("data:…")` va in una custom property con un valore per tema (`--chevron`, `--check-mark`) e il componente usa `background-image: var(--chevron)`. Un'icona nuova in data-URI = un token nuovo con i due valori. Se si può, meglio un `<svg>` inline con `stroke="currentColor"`.
+4. **Immagini dell'interfaccia** che non possono prendere il colore dal testo (il wordmark è un `<img>`): una variante per tema, mostrate con `.ss-only-light` / `.ss-only-dark`. Senza `data-theme` (JS spento) si vede la chiara.
+5. **Contrasti.** Le soglie di "Accessibilità" valgono in **tutti e due** i temi; i valori calcolati sono in `CHANGELOG.md`.
+
+### Contenuto o interfaccia, al buio
+
+Il tema cambia solo l'**interfaccia**. Restano uguali in tutti e due i temi: video, poster e miniature, il canvas e il video esportato, i colori scelti dall'utente, le bandiere dello switch lingua, i loghi dei prodotti (gli avatar hanno già il loro fondo), il fondo `--video-ink` dei media. Testi e anelli disegnati **sopra** un media (il titolo su un video) usano token propri che non cambiano col tema.
+
 ## Accessibilità
 
-- Contrasto AA: testo ≥ 4,5:1 (su corallo il testo è `--on-coral`), comandi ≥ 3:1.
+- Contrasto AA, in tutti e due i temi: testo ≥ 4,5:1 (su corallo il testo è `--on-coral`), comandi e anello di focus ≥ 3:1.
 - Focus sempre visibile (anello `--focus`). Tutto si usa da tastiera: timeline e slider con le frecce, modale con Esc e focus intrappolato.
 - `aria-label` su ogni bottone solo icona, `aria-pressed` su opzioni e toggle, `aria-current` su elementi attivi, `role="slider"` + `aria-value*` sullo scrubber.
 - `prefers-reduced-motion`: già gestito in `family.css`.
@@ -143,5 +193,6 @@ Il codice è `i18n.js` del kit: si copia e si carica con `defer`. Per i testi cr
 - [ ] Ogni valore viene da un token (cerca `#`, `px` e `rgb` scritti a mano fuori da `tokens.css`).
 - [ ] Hover, focus, attivo, disattivo e trascinamento sono definiti per ogni comando.
 - [ ] IT ed EN completi, lo switch funziona e ricorda la scelta.
+- [ ] Tema scuro: lo switch funziona e ricorda la scelta; nessun colore scritto a mano (il `grep` di "Temi" fuori da `tokens.css` trova solo ombre su `--shadow-ink` e contenuto); nessun testo o comando sparito.
 - [ ] 1366×768 e 375×667 senza scroll orizzontale; a 375 lo stage sta sopra il pannello.
 - [ ] Console senza errori, tutte le funzioni di prima funzionano ancora.

@@ -10,11 +10,13 @@ File di stile, nell'ordine di caricamento:
 | `css/family.css` | componenti del kit, invariati; in coda i componenti nuovi dell'app (prefisso `ss-`) e le scelte dell'app |
 | `css/style.css` | solo colla di pagina (landing, righe di campi, wizard), con soli token |
 
+Il kit copiato è il **kit 1.1** (temi): `js/theme.js` del kit va nel `<head>` prima di ogni foglio di stile.
+
 ## Design language
 
 - **Galleria in una stanza.** La pagina è la parete grigio chiaro dell'hub; l'anteprima del video è un quadro 9:16 appeso alla parete (`.ss-stage` + `.ss-frame`), con la luce chiara dietro. I comandi stanno su un foglio di carta (`.ss-panel`).
 - **Silenzio cromatico.** L'interfaccia è inchiostro su carta. Il colore arriva dal contenuto (video, miniature, colori scelti per titolo e numeri) e dal **corallo**, una sola azione per vista: *Genera il video classifica*, *Inizia a creare*, la conferma nelle modali.
-- **Contrasto dei comandi (scelta dell'app).** Tutti gli altri bottoni sono inchiostro (`--ink-900`) con testo carta: si leggono bene sulla carta del pannello. I bottoni disattivati affondano nella carta (`--field`, testo `--ink-500`) invece di sbiadire.
+- **Contrasto dei comandi (scelta dell'app).** Tutti gli altri bottoni sono inchiostro (`--ink-900`) con testo `--on-ink`: si leggono bene sulla carta del pannello, e al buio diventano pillole chiare con testo scuro. I bottoni disattivati affondano nella carta (`--field`, testo `--ink-500`) invece di sbiadire.
 - **Testo sottile e piccolo.** Urbanist 300 per titoli e numeri, 400 per il resto; mai grassetto, l'evidenza è inchiostro più scuro.
 - **Poche parole.** Ogni scheda dice solo quello che serve; i dettagli (formati accettati, cosa fa un bottone) stanno nei tooltip.
 
@@ -23,10 +25,10 @@ File di stile, nell'ordine di caricamento:
 | Elemento | Ricetta | Note |
 |---|---|---|
 | Parete | `body` di `family.css` | il `body` è una colonna: sulle pagine corte il footer resta in fondo alla parete |
-| Topbar | `.ss-topbar`: wordmark ScrollStudio → `https://kekkocoppola.github.io/ScrollStudio/`, barra obliqua, avatar + **TopFratmRanks** → `index.html`, switch lingua | niente nav: lo switch va a destra (N15) |
+| Topbar | `.ss-topbar`: wordmark ScrollStudio (doppio, `.ss-only-light` / `.ss-only-dark`) → `https://kekkocoppola.github.io/ScrollStudio/`, barra obliqua, avatar + **TopFratmRanks** → `index.html`, switch lingua, switch tema `.ss-theme` | niente nav: i due switch vanno a destra (N15); su telefono lo switch tema è la seconda riga, a destra |
 | Titolo pagina | `.ss-head` | landing: "Crea video classifica TikTok in pochi secondi"; editor: "Crea la tua classifica" + descrizione |
 | Editor | `.ss-editor` = `.ss-panel` + `.ss-stage` | sotto 860px lo stage va sopra il pannello |
-| Footer | `.ss-footer` | wordmark + © 2026 |
+| Footer | `.ss-footer` | wordmark (doppio, come in topbar) + © 2026 |
 | Favicon | `assets/topfratmranks-logo.svg` | lo stesso avatar della card dell'hub |
 
 ## Schermate
@@ -51,7 +53,7 @@ Urbanist 300/400 da Google Fonts. I font **del contenuto** (Anton, Bangers, Beba
 
 ## Componenti
 
-Ricette del kit usate così come sono: `.ss-btn` (+ `--primary`, `--sm`, `--block`), `.ss-icon-btn` (+ `--bare`), `.ss-link`, `.ss-field`, `.ss-label`, `.ss-input` (+ `--num`), `.ss-select`, `.ss-textarea`, `.ss-hint`, `.ss-swatch`, `.ss-row`, `.ss-switch`, `.ss-segmented`, `.ss-panel`, `.ss-section`, `.ss-editor`, `.ss-stage`, `.ss-frame`, `.ss-timeline` (senza segmenti né velocità), `.ss-list`, `.ss-clip`, `.ss-progress`, `.ss-badge`, `.ss-note`, `.ss-overlay`, `.ss-modal`, `.ss-lang`, `.ss-topbar`, `.ss-head`, `.ss-footer`.
+Ricette del kit usate così come sono: `.ss-btn` (+ `--primary`, `--sm`, `--block`), `.ss-icon-btn` (+ `--bare`), `.ss-link`, `.ss-field`, `.ss-label`, `.ss-input` (+ `--num`), `.ss-select`, `.ss-textarea`, `.ss-hint`, `.ss-swatch`, `.ss-row`, `.ss-switch`, `.ss-segmented`, `.ss-panel`, `.ss-section`, `.ss-editor`, `.ss-stage`, `.ss-frame`, `.ss-timeline` (senza segmenti né velocità), `.ss-list`, `.ss-clip`, `.ss-progress`, `.ss-badge`, `.ss-note`, `.ss-overlay`, `.ss-modal`, `.ss-lang`, `.ss-theme`, `.ss-only-light` / `.ss-only-dark`, `.ss-topbar`, `.ss-head`, `.ss-footer`.
 
 ### Componenti nuovi (non ancora nel kit)
 
@@ -78,10 +80,20 @@ Ricette in coda a `css/family.css`, valori solo da `css/tokens.css`. Derivati co
 
 | Regola | Kit | App | Perché |
 |---|---|---|---|
-| Bottoni secondari e a icona | carta con testo `--ink-900` | `--ink-900` con testo `--paper`; hover `--ink-700`; opzione scelta del segmented uguale | sulla carta del pannello i bottoni di carta non si distinguevano |
-| Bottoni disattivati | opacità 0,4 | fondo `--field`, testo `--ink-500` (4,8:1) | il rosa e il grigio sbiaditi non si leggevano |
+| Bottoni secondari e a icona | carta con testo `--ink-900` | `--ink-900` con testo `--on-ink`; hover `--ink-700`; opzione scelta del segmented uguale | sulla carta del pannello i bottoni di carta non si distinguevano |
+| Bottoni disattivati | opacità 0,4 | fondo `--field`, testo `--ink-500` (4,7:1 in chiaro, 5,7:1 in scuro) | il rosa e il grigio sbiaditi non si leggevano |
 
 Le altre regole del kit restano: una sola azione corallo per vista, rimozioni senza bottoni rossi (icone bare + conferma in modale), niente bordi su pannelli e card, raggi 4 / 2 / pillola / cerchio.
+
+## Tema (chiaro / scuro)
+
+Quello del kit 1.1, senza variazioni (`FAMILY-DESIGN.md`, sezione "Temi"; procedura in `THEME-ADOPTION.md`).
+
+- `js/theme.js` scrive `data-theme="light|dark"` su `<html>` prima dei CSS, così la pagina non lampeggia. La scelta resta in `localStorage` `scrollstudio-theme`, condivisa con l'hub e con le altre app (stesso origin su GitHub Pages); senza scelta segue il sistema.
+- Switch `.ss-theme` (sole, luna) subito dopo lo switch lingua, in topbar. Nella modale dei termini c'è solo lo switch lingua: il tema non impedisce di leggere.
+- Il tema scuro ridefinisce solo i token; le aggiunte dell'app usano i token di ruolo del kit: `--on-ink` per testo e icone sui bottoni d'inchiostro e per l'anello del pallino delle parole, `--check-mark` per la spunta dei termini. Nessun token nuovo dell'app.
+- Restano uguali in tutti e due i temi: canvas e video esportato, colori scelti dall'utente, miniature, bandiere, avatar.
+- Contrasti delle aggiunte nei due temi: `design/KIT-FEEDBACK.md`, sezione "Tema scuro".
 
 ## Icone
 
@@ -100,7 +112,7 @@ Quello del kit: hover 400ms ease-out, aperture 360ms `--ease-open`, scorrimenti 
 
 ## Accessibilità
 
-- Contrasto: testo ≥ 4,5:1 (su corallo il testo è `--on-coral`; sui bottoni neri è `--paper`, ~14:1); comandi ≥ 3:1.
+- Contrasto: testo ≥ 4,5:1 in tutti e due i temi (su corallo il testo è `--on-coral`; sui bottoni d'inchiostro è `--on-ink`, 13,7:1 in chiaro e 10,2:1 in scuro); comandi ≥ 3:1.
 - Focus sempre visibile (anello `--focus`). Modali: Esc chiude (tranne i termini, che vanno accettati), Tab resta dentro, il focus torna dov'era (`js/modal.js`). La conferma di rimozione apre col focus su *Annulla*.
 - Timeline: `role="slider"` con `aria-value*`, frecce ←/→ (±1 s), Home/Fine.
 - `aria-pressed` su B/I e sui numeri 1–10; `aria-label` su ogni bottone solo icona; la drop zone è un bottone (*Carica file*).

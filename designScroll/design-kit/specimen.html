@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>ScrollStudio — Specimen famiglia</title>
   <meta name="theme-color" content="#E9E9E8">
+  <script src="theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400&display=swap">
@@ -26,7 +27,8 @@
 <body>
   <header class="ss-topbar">
     <a class="ss-topbar__home" href="#" aria-label="ScrollStudio, torna all'hub">
-      <img src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+      <img class="ss-only-light" src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+      <img class="ss-only-dark" src="assets/scrollstudio-wordmark-light.svg" alt="ScrollStudio" width="796" height="404">
     </a>
     <span class="ss-topbar__sep" aria-hidden="true"></span>
     <a class="ss-topbar__product" href="#">
@@ -45,6 +47,14 @@
       <button class="ss-lang__option" type="button" aria-pressed="false" data-lang="en">
         <svg class="ss-lang__flag" viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><clipPath id="flag-uk-cross"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path fill="#012169" d="M0 0h60v30H0z"/><path stroke="#FFF" stroke-width="6" d="m0 0 60 30m0-30L0 30"/><path stroke="#C8102E" stroke-width="4" clip-path="url(#flag-uk-cross)" d="m0 0 60 30m0-30L0 30"/><path stroke="#FFF" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#C8102E" stroke-width="6" d="M30 0v30M0 15h60"/></svg>
         EN
+      </button>
+    </div>
+    <div class="ss-theme" role="group" aria-label="Tema" data-en-aria-label="Theme">
+      <button class="ss-theme__option" type="button" aria-pressed="true" data-theme-choice="light" aria-label="Tema chiaro" data-en-aria-label="Light theme">
+        <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="2.2"/><path d="M6 1v1.2M6 9.8V11M1 6h1.2M9.8 6H11M2.5 2.5l.85.85M8.65 8.65l.85.85M2.5 9.5l.85-.85M8.65 3.35l.85-.85"/></svg>
+      </button>
+      <button class="ss-theme__option" type="button" aria-pressed="false" data-theme-choice="dark" aria-label="Tema scuro" data-en-aria-label="Dark theme">
+        <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M9.5 7.6A4 4 0 1 1 4.4 2.5a4.2 4.2 0 0 0 5.1 5.1Z"/></svg>
       </button>
     </div>
   </header>
@@ -239,7 +249,8 @@
   </section>
 
   <footer class="ss-footer">
-    <img src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+    <img class="ss-only-light" src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+    <img class="ss-only-dark" src="assets/scrollstudio-wordmark-light.svg" alt="ScrollStudio" width="796" height="404">
     <span>© 2026</span>
   </footer>
 

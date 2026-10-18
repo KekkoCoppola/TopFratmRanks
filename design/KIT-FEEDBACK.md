@@ -44,7 +44,7 @@ Nato dal redesign di TopFratmRanks (branch `redesign/scrollstudio`). Da portare 
 
 Decise dall'utente durante la Fase 3, perché i bottoni non si leggevano:
 
-1. **Bottoni secondari e a icona in inchiostro** (`--ink-900`, testo `--paper`, hover `--ink-700`), opzione scelta del segmented uguale. Sulla carta del pannello i bottoni di carta si distinguevano solo per l'ombra.
+1. **Bottoni secondari e a icona in inchiostro** (`--ink-900`, testo `--on-ink`, hover `--ink-700`), opzione scelta del segmented uguale. Sulla carta del pannello i bottoni di carta si distinguevano solo per l'ombra.
 2. **Disattivato leggibile**: fondo `--field`, testo `--ink-500` invece dell'opacità 0,4 (il corallo al 40% diventa rosa illeggibile).
 3. **Meno testo**: le posizioni vuote non ripetono "Trascina qui una clip…" / "oppure" / formati; i formati vanno nel tooltip, il file si trascina su tutta la scheda.
 
@@ -56,6 +56,31 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
 - **`hidden` sugli SVG.** `svg.hidden = true` non fa nulla (la proprietà esiste solo sugli elementi HTML): per alternare icone usare `toggleAttribute('hidden')`. Utile come nota nello specimen.
 - **Ordine degli script.** Con `i18n.js` in `defer`, gli script dell'app partono prima: i testi creati dal JS devono partire in italiano e ridisegnarsi su `ss:lang`.
 - **Testo minimo.** `--fs-xs` (11px) è sotto la soglia di 12px segnalata dagli strumenti di audit per il testo corrente; nel kit è riservato a etichette, meta e badge, ma conviene dirlo esplicitamente in `FAMILY-DESIGN.md`.
+- **Versione del kit e `grep -m1 "kit "`.** In TopFratmRanks con il kit 1.0 il comando di `THEME-ADOPTION.md` (punto 0) trovava il commento "not in the hub kit yet" delle aggiunte e sembrava una versione. Proposta: `grep -m1 "kit [0-9]" css/tokens.css`.
+
+## Tema scuro (kit 1.1, adottato il 2026-10-18)
+
+Seguito `THEME-ADOPTION.md` senza deviazioni: kit 1.1 copiato con le aggiunte in coda (parte del kit identica al kit), `js/theme.js` sincrono prima del primo foglio di stile, switch `.ss-theme` dopo `.ss-lang` e doppio wordmark (`.ss-only-light` / `.ss-only-dark`) in topbar e footer di `index.html` ed `editor.html`, appendice TopFratmRanks applicata. Nessun token nuovo dell'app; nella modale dei termini niente switch del tema (proposta della guida).
+
+| Regola delle aggiunte | Prima | Dopo | Chiaro |
+|---|---|---|---|
+| N15 topbar senza nav, telefono | `padding-bottom: var(--s-6)` | `row-gap: var(--s-1)` (la seconda riga è lo switch, 4 + 28 = 32px) | titolo della pagina allo stesso posto |
+| bottoni d'inchiostro, opzione scelta del segmented | `color: var(--paper)` | `color: var(--on-ink)` | `--on-ink` = `--paper` |
+| N3 anello del pallino della parola | `var(--paper)` | `var(--on-ink)` | identico |
+| N14 spunta della casella | data-URI con `%23FBFBFA` | `var(--check-mark)` | stesso data-URI |
+
+Contrasti delle coppie usate dalle aggiunte (WCAG 2.x):
+
+| Coppia | Chiaro | Scuro | Soglia |
+|---|---|---|---|
+| `--on-ink` su `--ink-900` (testo dei bottoni, opzione scelta, spunta) | 13,65 | 10,22 | 4,5 |
+| `--on-ink` su `--ink-700` (hover dei bottoni) | 8,80 | 6,91 | 4,5 |
+| `--ink-500` su `--field` (bottone disattivato) | 4,71 | 5,66 | 4,5 |
+| `--ink-500` su `--paper` (hover dello swatch) | 5,52 | 4,71 | 3 |
+| `--ink-700` su `--paper` (scheda vuota con un file sopra) | 8,80 | 6,91 | 3 |
+| `--ink-500` su `--wall-top` / `--wall-bottom` (switch tema a riposo) | 4,71 / 3,94 | 5,36 / 6,18 | 3 |
+
+Colori scritti a mano rimasti: ombre `rgb(var(--shadow-ink) / α)`; il ripiego `var(--c, var(--paper))` del pallino (il JS imposta sempre `--c`); nel JS solo contenuto (colori delle parole e dei numeri, canvas, nero dietro le miniature) e le bandiere.
 
 ## CSS (blocco "TopFratmRanks additions" di `css/family.css`)
 
@@ -66,17 +91,18 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
    Listed in design/KIT-FEEDBACK.md to be brought back into the hub kit.
    ========================================================================== */
 
-/* N15 Topbar without nav: an app with no menu still keeps the language switch on the right */
+/* N15 Topbar without nav: an app with no menu still keeps the language switch on the right
+   (the theme switch follows it, so both sit on the right together) */
 
 .ss-topbar:not(:has(.ss-topbar__nav)) .ss-lang {
   margin-left: auto;
 }
 
-/* On phones the nav normally wraps to a second row (row-gap --s-4 + one link row);
-   without it the page title would sit right under the logo, so keep that air */
+/* On phones the theme switch is the second row (kit 1.1): 4px row gap + the 28px switch
+   give the same 32px of air the empty row used to need, so the page title doesn't move */
 @media (max-width: 640px) {
   .ss-topbar:not(:has(.ss-topbar__nav)) {
-    padding-bottom: var(--s-6);
+    row-gap: var(--s-1);
   }
 }
 
@@ -134,12 +160,12 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
 }
 
 /* App choice (asked by the user, 2026-10-18; not in the hub kit): every button except the
-   coral main action is ink with paper text, for contrast on paper. Same for the chosen
+   coral main action is ink with on-ink text, for contrast on paper. Same for the chosen
    segmented option. Hover goes one ink step lighter. Bare icon buttons stay bare */
 
 .ss-btn:not(.ss-btn--primary),
 .ss-icon-btn:not(.ss-icon-btn--bare):not(.ss-icon-btn--coral) {
-  color: var(--paper);
+  color: var(--on-ink);
   background: var(--ink-900);
   transition:
     transform var(--dur-hover) ease-out,
@@ -153,7 +179,7 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
 }
 
 .ss-segmented__option[aria-pressed="true"] {
-  color: var(--paper);
+  color: var(--on-ink);
   background: var(--ink-900);
 }
 
@@ -182,7 +208,7 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
   flex: none;
   background: var(--c, var(--paper));
   border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--paper); /* paper ring: a dark word colour still shows on the ink chip */
+  box-shadow: 0 0 0 1px var(--on-ink); /* ring in the on-ink colour: a dark word colour still shows on the ink chip */
 }
 
 /* N13 Account: the connected YouTube channel, avatar and name like the topbar product,
@@ -613,7 +639,7 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
 
 .ss-check:checked {
   background-color: var(--ink-900);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23FBFBFA' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2.5 6.5 2.5 2.5 4.5-6'/%3E%3C/svg%3E");
+  background-image: var(--check-mark);
   box-shadow: none;
 }
 
@@ -623,7 +649,7 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
 
 /* App choice (asked by the user, 2026-10-18): disabled buttons stay readable.
    The kit fades them to 40%, which leaves pale pink / grey text nobody can read;
-   here they sink into the paper (--field) with --ink-500 text (4.8:1) */
+   here they sink into the paper (--field) with --ink-500 text (4.7:1 light, 5.7:1 dark) */
 
 .ss-btn:disabled,
 .ss-btn[aria-disabled="true"],

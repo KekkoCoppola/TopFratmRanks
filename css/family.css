@@ -1,6 +1,7 @@
-/* ScrollStudio family components
-   Every child app (Bouncical, TopFratmRanks, …) loads tokens.css + this file + Urbanist 300/400.
-   Classes are prefixed ss-. Recipes are documented in FAMILY-DESIGN.md and shown in specimen.html. */
+/* ScrollStudio family components — kit 1.1: temi (see CHANGELOG.md)
+   Every child app (Bouncical, TopFratmRanks, …) loads theme.js + tokens.css + this file + Urbanist 300/400.
+   Classes are prefixed ss-. Recipes are documented in FAMILY-DESIGN.md and shown in specimen.html.
+   Colours come only from tokens.css, so every recipe follows the light and the dark theme. */
 
 /* Base */
 
@@ -237,6 +238,41 @@ h3 {
   opacity: 1;
 }
 
+/* Theme switch: right after the language switch, same states. Icons only (sun, moon):
+   the idle one rests in --ink-500 as the idle flag rests in grey; hover and pressed go --ink-900 */
+
+.ss-theme {
+  display: flex;
+  align-items: center;
+}
+
+.ss-theme__option {
+  display: grid;
+  place-items: center;
+  width: var(--control-h-sm);
+  height: var(--control-h-sm);
+  padding: 0;
+  color: var(--ink-500);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color var(--dur-hover) ease-out;
+}
+
+.ss-theme__option:hover,
+.ss-theme__option[aria-pressed="true"] {
+  color: var(--ink-900);
+}
+
+/* One element per theme (the wordmark is an <img>, it can't take currentColor).
+   With no data-theme (JS off) the light one shows */
+
+:root[data-theme="dark"] .ss-only-light,
+:root:not([data-theme="dark"]) .ss-only-dark {
+  display: none;
+}
+
 /* Page head: centred title and lede, like the hub hero */
 
 .ss-head {
@@ -438,7 +474,7 @@ h3 {
 
 .ss-select {
   padding-right: 32px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%2348484B' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E");
+  background-image: var(--chevron);
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 12px;
@@ -463,7 +499,7 @@ h3 {
   border: 0;
   border-radius: 50%;
   box-shadow:
-    0 0 0 1px rgb(var(--shadow-ink) / 0.18),
+    0 0 0 1px var(--swatch-ring),
     0 1px 3px rgb(var(--shadow-ink) / 0.12);
   cursor: pointer;
   -webkit-appearance: none;
@@ -498,7 +534,7 @@ h3 {
   color: var(--ink-700);
 }
 
-/* Switch: grey track, paper knob; on = ink-900 track */
+/* Switch: grey track, light knob; on = ink-900 track with an --on-ink knob */
 
 .ss-switch {
   position: relative;
@@ -521,7 +557,7 @@ h3 {
   left: 2px;
   width: 14px;
   height: 14px;
-  background: var(--paper);
+  background: var(--knob);
   border-radius: 50%;
   box-shadow: 0 1px 3px rgb(var(--shadow-ink) / 0.25);
   transition: transform var(--dur-open) var(--ease-open);
@@ -532,6 +568,7 @@ h3 {
 }
 
 .ss-switch:checked::after {
+  background: var(--on-ink);
   transform: translateX(12px);
 }
 
@@ -571,7 +608,7 @@ h3 {
   box-shadow: var(--shadow-raise);
 }
 
-/* Range: 2px track, ink-900 fill (set --p from JS), paper knob */
+/* Range: 2px track, ink-900 fill (set --p from JS), light knob */
 
 .ss-range {
   --p: 50%;
@@ -589,7 +626,7 @@ h3 {
 .ss-range::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
-  background: var(--paper);
+  background: var(--knob);
   border-radius: 50%;
   box-shadow:
     0 0 0 1px rgb(var(--shadow-ink) / 0.12),
@@ -602,7 +639,7 @@ h3 {
 .ss-range::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  background: var(--paper);
+  background: var(--knob);
   border: 0;
   border-radius: 50%;
   box-shadow:
@@ -699,7 +736,7 @@ h3 {
   position: absolute;
   inset: -8% -30% 20%;
   z-index: -1;
-  background: radial-gradient(closest-side, var(--wall-glow), rgb(250 250 250 / 0));
+  background: radial-gradient(closest-side, var(--wall-glow), var(--stage-glow-end));
   pointer-events: none;
 }
 
@@ -870,7 +907,7 @@ h3 {
   left: -5px;
   width: 10px;
   height: 10px;
-  background: var(--paper);
+  background: var(--knob);
   border-radius: 50%;
   box-shadow:
     0 0 0 1px var(--ink-900),
@@ -974,7 +1011,7 @@ h3 {
   padding: var(--s-5) var(--s-4);
   color: var(--ink-700);
   text-align: center;
-  border: 1px dashed rgb(var(--shadow-ink) / 0.25);
+  border: 1px dashed var(--line-dashed);
   border-radius: var(--radius);
   cursor: pointer;
   transition:
@@ -1061,7 +1098,7 @@ h3 {
   background: var(--coral);
 }
 
-/* Modal: the wall blurs and lightens, a sheet of paper comes forward */
+/* Modal: the wall blurs and fades back (--overlay), a sheet of paper comes forward */
 
 .ss-overlay {
   position: fixed;
@@ -1070,7 +1107,7 @@ h3 {
   display: grid;
   place-items: center;
   padding: var(--gutter);
-  background: rgb(233 233 232 / 0.7);
+  background: var(--overlay);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   animation: ss-fade var(--dur-fade) linear;
@@ -1219,6 +1256,22 @@ h3 {
     margin-left: auto;
   }
 
+  /* Row 1 (wordmark, product, language) has no room left for the theme switch at 375px,
+     so it closes row 2: on the right of the nav, or alone on the right with no nav */
+  .ss-theme {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .ss-topbar:has(.ss-theme) .ss-topbar__nav {
+    width: calc(100% - 2 * var(--control-h-sm) - var(--s-4));
+  }
+
+  .ss-topbar:not(:has(.ss-topbar__nav)) .ss-theme {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   .ss-modal {
     padding: var(--s-5) var(--s-5) var(--s-4);
   }
@@ -1241,17 +1294,18 @@ h3 {
    Listed in design/KIT-FEEDBACK.md to be brought back into the hub kit.
    ========================================================================== */
 
-/* N15 Topbar without nav: an app with no menu still keeps the language switch on the right */
+/* N15 Topbar without nav: an app with no menu still keeps the language switch on the right
+   (the theme switch follows it, so both sit on the right together) */
 
 .ss-topbar:not(:has(.ss-topbar__nav)) .ss-lang {
   margin-left: auto;
 }
 
-/* On phones the nav normally wraps to a second row (row-gap --s-4 + one link row);
-   without it the page title would sit right under the logo, so keep that air */
+/* On phones the theme switch is the second row (kit 1.1): 4px row gap + the 28px switch
+   give the same 32px of air the empty row used to need, so the page title doesn't move */
 @media (max-width: 640px) {
   .ss-topbar:not(:has(.ss-topbar__nav)) {
-    padding-bottom: var(--s-6);
+    row-gap: var(--s-1);
   }
 }
 
@@ -1309,12 +1363,12 @@ h3 {
 }
 
 /* App choice (asked by the user, 2026-10-18; not in the hub kit): every button except the
-   coral main action is ink with paper text, for contrast on paper. Same for the chosen
+   coral main action is ink with on-ink text, for contrast on paper. Same for the chosen
    segmented option. Hover goes one ink step lighter. Bare icon buttons stay bare */
 
 .ss-btn:not(.ss-btn--primary),
 .ss-icon-btn:not(.ss-icon-btn--bare):not(.ss-icon-btn--coral) {
-  color: var(--paper);
+  color: var(--on-ink);
   background: var(--ink-900);
   transition:
     transform var(--dur-hover) ease-out,
@@ -1328,7 +1382,7 @@ h3 {
 }
 
 .ss-segmented__option[aria-pressed="true"] {
-  color: var(--paper);
+  color: var(--on-ink);
   background: var(--ink-900);
 }
 
@@ -1357,7 +1411,7 @@ h3 {
   flex: none;
   background: var(--c, var(--paper));
   border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--paper); /* paper ring: a dark word colour still shows on the ink chip */
+  box-shadow: 0 0 0 1px var(--on-ink); /* ring in the on-ink colour: a dark word colour still shows on the ink chip */
 }
 
 /* N13 Account: the connected YouTube channel, avatar and name like the topbar product,
@@ -1788,7 +1842,7 @@ h3 {
 
 .ss-check:checked {
   background-color: var(--ink-900);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23FBFBFA' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2.5 6.5 2.5 2.5 4.5-6'/%3E%3C/svg%3E");
+  background-image: var(--check-mark);
   box-shadow: none;
 }
 
@@ -1798,7 +1852,7 @@ h3 {
 
 /* App choice (asked by the user, 2026-10-18): disabled buttons stay readable.
    The kit fades them to 40%, which leaves pale pink / grey text nobody can read;
-   here they sink into the paper (--field) with --ink-500 text (4.8:1) */
+   here they sink into the paper (--field) with --ink-500 text (4.7:1 light, 5.7:1 dark) */
 
 .ss-btn:disabled,
 .ss-btn[aria-disabled="true"],
