@@ -1,0 +1,100 @@
+/* ScrollStudio family tokens
+   Copy this file into every child app, unchanged. Values come from the hub (ScrollStudio/css/tokens.css):
+   the hub scales its room in "u", apps use plain px on a 4px grid.
+   No new hues: a new token is either an opacity of an ink or of --shadow-ink, and is listed in DESIGN.md. */
+
+:root {
+  /* Wall: the page background, light grey from the top down to the floor */
+  --wall-top: #E9E9E8;
+  --wall-mid: #E1E1E0;
+  --wall-bottom: #D7D6D5;
+  --wall-light: rgb(255 255 255 / 0.38);
+  --wall-glow: rgb(250 250 250 / 0.85);
+
+  /* Surfaces */
+  --paper: #FBFBFA;           /* panels, cards, pills (the hub calls it --card) */
+  --card: var(--paper);
+  --field: var(--wall-top);   /* inputs and tracks sunk into paper */
+  --video-ink: #0E0E10;       /* behind media while it loads */
+
+  /* Ink */
+  --ink-900: #2B2B2D;         /* titles, values, active state */
+  --ink-700: #48484B;         /* text, labels, idle controls */
+  --ink-500: #66666A;         /* placeholders, durations, handles; darker than the hub's #76767A to pass AA on paper and field */
+  --hairline: rgb(34 31 29 / 0.1);
+  --track: rgb(34 31 29 / 0.16);
+
+  /* The only accent: one coral action per view, and error dots */
+  --coral: #FD767E;
+  --on-coral: #2B2B2D;        /* text on coral: ink-900 is 5.4:1, white would be 2.6:1 */
+  --on-coral-icon: #FFFFFF;   /* the hub's "+" glyph; icon-only, always with aria-label */
+
+  /* Focus ring */
+  --focus: #8E5EEA;
+
+  /* Depth ladder: wall 0 → field −1 → raised 1 → panel 2 → floating paper 3 */
+  --shadow-ink: 34 31 29;
+  --shadow-raise: 0 2px 10px rgb(var(--shadow-ink) / 0.12);
+  --shadow-raise-hover: 0 4px 14px rgb(var(--shadow-ink) / 0.16);
+  --shadow-panel: 0 18px 40px -18px rgb(var(--shadow-ink) / 0.22), 0 1px 3px rgb(var(--shadow-ink) / 0.05);
+  --shadow-paper: 0 22px 38px -8px rgb(var(--shadow-ink) / 0.3), 0 2px 6px rgb(var(--shadow-ink) / 0.06);
+  --shadow-coral: 0 6px 14px -4px rgb(253 118 126 / 0.55);
+  --shadow-coral-hover: 0 8px 18px -4px rgb(253 118 126 / 0.6);
+
+  /* Type: Urbanist 300/400 only, never bold */
+  --font: "Urbanist", "Gilroy", "Sofia Pro", ui-sans-serif, system-ui, sans-serif;
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fs-xs: 11px;   /* meta, labels, badges, time */
+  --fs-sm: 13px;   /* body, controls */
+  --fs-md: 16px;   /* section titles, item names (300) */
+  --fs-lg: 22px;   /* panel and modal titles, big numbers (300) */
+  --fs-xl: 28px;   /* page title (300) */
+  --lh-tight: 1.15;
+  --lh-text: 1.45;
+
+  /* Shape: pills for what you press, 4px for surfaces and media, circles for icons and knobs */
+  --radius: 4px;
+  --radius-sm: 2px;
+  --radius-pill: 999px;
+
+  /* Space: 4px grid */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --gutter: clamp(24px, 5.625vw, 72px); /* 45u of the hub's 800u frame */
+  --topbar-h: 68px;
+
+  /* Controls */
+  --control-h: 34px;
+  --control-h-sm: 28px;
+
+  /* Motion, measured from the hub reference */
+  --ease-glide: linear(0, 0.077, 0.166, 0.255, 0.345, 0.43, 0.514, 0.6, 0.677, 0.749, 0.813, 0.872, 0.923, 0.962, 0.991, 1);
+  --ease-open: linear(0, 0.256, 0.388, 0.519, 0.638, 0.75, 0.844, 0.925, 0.981, 1);
+  --dur-glide: 600ms;   /* things that travel */
+  --dur-open: 360ms;    /* things that reveal or change state */
+  --dur-fade: 200ms;    /* opacity */
+  --dur-shadow: 480ms;
+  --dur-hover: 400ms;   /* hover, with ease-out */
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 24px;
+    --fs-xl: 22px;
+    --topbar-h: auto;
+  }
+}
+
+/* ==========================================================================
+   TopFratmRanks additions (not in the hub kit yet, see design/KIT-FEEDBACK.md)
+   ========================================================================== */
+
+:root {
+  --panel-w: 340px; /* widest settings sheet: the max column of .ss-editor's panel in family.css; the landing uses the same sheet */
+}

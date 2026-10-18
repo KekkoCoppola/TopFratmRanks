@@ -1,31 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TopRankVids — Create TikTok ranking videos in your browser. Choose a rank, add clips, customize the title, export to MP4.">
-  <title>TopRankVids — TikTok Ranking Video Creator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="TopFratmRanks — Crea video classifica TikTok nel browser. Scegli le posizioni, aggiungi le clip, personalizza il titolo, esporta in MP4." data-en-content="TopFratmRanks — Create TikTok ranking videos in your browser. Choose a rank, add clips, customize the title, export to MP4.">
+  <meta name="theme-color" content="#E9E9E8">
+  <title data-en="TopFratmRanks — TikTok Ranking Video Creator">TopFratmRanks — Crea video classifica TikTok</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400&display=swap">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/family.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <link rel="icon" href="assets/topfratmranks-logo.svg" type="image/svg+xml">
+  <script src="js/i18n.js" defer></script>
 </head>
 <body>
-  <main class="landing-page">
-    <div class="landing-card">
-      <h1 class="landing-logo">TopRankVids</h1>
-      <p class="landing-tagline">Create TikTok ranking videos in seconds</p>
-
-      <p class="rank-label">How many items in your ranking?</p>
-      <div class="rank-grid" id="rank-grid"></div>
-
-      <button class="btn btn-primary btn-full" id="btn-start" disabled>
-        ✨ Start Creating
+  <header class="ss-topbar">
+    <a class="ss-topbar__home" href="https://kekkocoppola.github.io/ScrollStudio/" aria-label="ScrollStudio, torna all'hub" data-en-aria-label="ScrollStudio, back to the hub">
+      <img src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+    </a>
+    <span class="ss-topbar__sep" aria-hidden="true"></span>
+    <a class="ss-topbar__product" href="index.html" aria-current="page">
+      <img src="assets/topfratmranks-logo.svg" alt="">
+      <span>TopFratmRanks</span>
+    </a>
+    <div class="ss-lang" role="group" aria-label="Lingua" data-en-aria-label="Language">
+      <button class="ss-lang__option" type="button" aria-pressed="true" data-lang="it">
+        <svg class="ss-lang__flag" viewBox="0 0 3 2" preserveAspectRatio="none" aria-hidden="true"><path fill="#009246" d="M0 0h1v2H0z"/><path fill="#F4F5F0" d="M1 0h1v2H1z"/><path fill="#CE2B37" d="M2 0h1v2H2z"/></svg>
+        IT
+      </button>
+      <button class="ss-lang__option" type="button" aria-pressed="false" data-lang="en">
+        <svg class="ss-lang__flag" viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><clipPath id="flag-uk-cross"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path fill="#012169" d="M0 0h60v30H0z"/><path stroke="#FFF" stroke-width="6" d="m0 0 60 30m0-30L0 30"/><path stroke="#C8102E" stroke-width="4" clip-path="url(#flag-uk-cross)" d="m0 0 60 30m0-30L0 30"/><path stroke="#FFF" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#C8102E" stroke-width="6" d="M30 0v30M0 15h60"/></svg>
+        EN
       </button>
     </div>
+  </header>
+
+  <div class="ss-head">
+    <h1 class="ss-head__title" data-en="Create TikTok ranking videos in seconds">Crea video classifica TikTok in pochi secondi</h1>
+  </div>
+
+  <main class="landing">
+    <section class="ss-panel landing__panel" aria-labelledby="rank-question">
+      <h2 class="landing__question" id="rank-question" data-en="How many items in your ranking?">Quante posizioni nella tua classifica?</h2>
+      <div class="ss-segmented ss-segmented--grid" id="rank-grid" role="group" aria-labelledby="rank-question"></div>
+
+      <button class="ss-btn ss-btn--primary ss-btn--block" id="btn-start" type="button" disabled data-en="Start Creating">Inizia a creare</button>
+    </section>
   </main>
 
+  <footer class="ss-footer">
+    <img src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+    <span>© 2026</span>
+  </footer>
+
+  <script src="js/strings.js"></script>
+  <script src="js/modal.js"></script>
   <script src="js/terms.js"></script>
   <script src="js/app.js"></script>
 </body>

@@ -86,7 +86,7 @@
       video.onloadedmetadata = function () {
         if (!video.videoWidth || !video.duration || !isFinite(video.duration)) {
           URL.revokeObjectURL(url);
-          reject(new Error('This file has no readable video track.'));
+          reject(new Error(TRV.t('errNoVideoTrack')));
           return;
         }
         var previous = state.clips[rankIndex];
@@ -107,7 +107,7 @@
 
       video.onerror = function () {
         URL.revokeObjectURL(url);
-        reject(new Error('Cannot decode this video. Use MP4 (H.264) or WebM.'));
+        reject(new Error(TRV.t('errDecode')));
       };
     });
   }

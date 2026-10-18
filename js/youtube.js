@@ -47,7 +47,7 @@
       (function check() {
         if (window.google && google.accounts && google.accounts.oauth2) return resolve();
         waited += 200;
-        if (waited >= 10000) return reject(new Error('Google sign-in script failed to load. Check your connection or ad blocker.'));
+        if (waited >= 10000) return reject(new Error(TRV.t('errGisLoad')));
         setTimeout(check, 200);
       })();
     });
@@ -73,13 +73,13 @@
             expiresAt = Date.now() + (resp.expires_in ? resp.expires_in * 1000 : 3300000);
             p.resolve();
           } else {
-            p.reject(new Error((resp && resp.error_description) || 'Google sign-in failed.'));
+            p.reject(new Error((resp && resp.error_description) || TRV.t('errSignIn')));
           }
         },
         error_callback: function (err) {
           var p = pendingAuth;
           pendingAuth = null;
-          if (p) p.reject(new Error(err && err.message ? err.message : 'Google sign-in was cancelled.'));
+          if (p) p.reject(new Error(err && err.message ? err.message : TRV.t('errSignInCancelled')));
         }
       });
     }
@@ -89,10 +89,10 @@
   // Request an access token. interactive=true forces the consent popup;
   // false attempts a silent grant (works if the user already consented).
   function requestToken(interactive) {
-    if (!isConfigured()) return Promise.reject(new Error('Publishing is not configured (missing Google Client ID).'));
+    if (!isConfigured()) return Promise.reject(new Error(TRV.t('errNotConfigured')));
     return waitForGis().then(function () {
       return new Promise(function (resolve, reject) {
-        if (pendingAuth) return reject(new Error('Another sign-in is already in progress.'));
+        if (pendingAuth) return reject(new Error(TRV.t('errSignInBusy')));
         pendingAuth = { resolve: resolve, reject: reject };
         try {
           getTokenClient().requestAccessToken({ prompt: interactive ? 'consent' : '' });
@@ -120,7 +120,7 @@
     e.status = status;
     e.reason = reason;
     if (status === 403 && /quota/i.test(reason || msg)) {
-      e.message = 'Daily YouTube upload quota reached — try again tomorrow.';
+      e.message = TRV.t('errQuota');
       e.quota = true;
     }
     return e;
@@ -129,7 +129,7 @@
   function fetchChannel() {
     return apiGet('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true').then(function (j) {
       var item = j.items && j.items[0];
-      if (!item) throw new Error('No YouTube channel found on this Google account.');
+      if (!item) throw new Error(TRV.t('errNoChannel'));
       channel = {
         title: item.snippet.title,
         thumb: item.snippet.thumbnails && item.snippet.thumbnails.default ? item.snippet.thumbnails.default.url : null
@@ -185,14 +185,14 @@
       xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
           try { resolve(JSON.parse(xhr.responseText)); }
-          catch (e) { reject(new Error('Upload finished but the response could not be read.')); }
+          catch (e) { reject(new Error(TRV.t('errUploadResponse'))); }
         } else {
           var body = null;
           try { body = JSON.parse(xhr.responseText); } catch (e) {}
           reject(httpError(xhr.status, body));
         }
       };
-      xhr.onerror = function () { reject(new Error('Network error during upload.')); };
+      xhr.onerror = function () { reject(new Error(TRV.t('errNetwork'))); };
       xhr.send(blob);
     });
   }
@@ -216,20 +216,20 @@
       xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
           try { resolve(JSON.parse(xhr.responseText)); }
-          catch (e) { reject(new Error('Upload finished but the response could not be read.')); }
+          catch (e) { reject(new Error(TRV.t('errUploadResponse'))); }
         } else {
           var b = null;
           try { b = JSON.parse(xhr.responseText); } catch (e) {}
           reject(httpError(xhr.status, b));
         }
       };
-      xhr.onerror = function () { reject(new Error('Network error during upload.')); };
+      xhr.onerror = function () { reject(new Error(TRV.t('errNetwork'))); };
       xhr.send(body);
     });
   }
 
   function doUpload(blob, meta, onProgress) {
-    onProgress({ stage: 'Starting upload…', pct: 0 });
+    onProgress({ stage: TRV.t('startingUpload'), pct: 0 });
     // 1) resumable session
     return fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
       method: 'POST',
@@ -245,17 +245,17 @@
       var loc = r.headers.get('Location') || r.headers.get('location');
       if (!loc) {
         // CORS did not expose the session URL — single-request fallback.
-        onProgress({ stage: 'Uploading…', pct: 0 });
+        onProgress({ stage: TRV.t('uploading'), pct: 0 });
         return uploadMultipart(blob, meta, function (p) {
-          onProgress({ stage: 'Uploading… ' + Math.round(p * 100) + '%', pct: p });
+          onProgress({ stage: TRV.t('uploadingPct', { p: Math.round(p * 100) }), pct: p });
         });
       }
       // 2) upload the bytes
       return xhrPut(loc, blob, { 'Content-Type': 'video/mp4' }, function (p) {
-        onProgress({ stage: 'Uploading… ' + Math.round(p * 100) + '%', pct: p });
+        onProgress({ stage: TRV.t('uploadingPct', { p: Math.round(p * 100) }), pct: p });
       });
     }).then(function (json) {
-      if (!json || !json.id) throw new Error('YouTube did not return a video id.');
+      if (!json || !json.id) throw new Error(TRV.t('errNoVideoId'));
       return { videoId: json.id, url: 'https://www.youtube.com/watch?v=' + json.id };
     });
   }
@@ -267,7 +267,7 @@
     return ensureToken().then(function () {
       return doUpload(blob, meta, onProgress).catch(function (err) {
         if (err && err.status === 401) {
-          onProgress({ stage: 'Session expired — signing in again…', pct: 0 });
+          onProgress({ stage: TRV.t('sessionExpired'), pct: 0 });
           return requestToken(false).then(function () { return doUpload(blob, meta, onProgress); });
         }
         throw err;

@@ -1,4 +1,4 @@
-# TopRankVids 🎬
+# TopFratmRanks 🎬
 
 A lightweight, local, 100% client-side web application designed to help users generate vertical ranking videos (1080×1920) optimized for short-form social video platforms (such as TikTok, YouTube Shorts, and Instagram Reels) directly in the browser—with zero server installation.
 

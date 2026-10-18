@@ -1,323 +1,447 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TopRankVids Editor — Compose your TikTok ranking video with custom title, clips and colors.">
-  <title>TopRankVids — Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Editor di TopFratmRanks — Componi il tuo video classifica TikTok con titolo, clip e colori personalizzati." data-en-content="TopFratmRanks Editor — Compose your TikTok ranking video with custom title, clips and colors.">
+  <meta name="theme-color" content="#E9E9E8">
+  <title>TopFratmRanks — Editor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- UI font (ScrollStudio kit) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400&display=swap">
+  <!-- Content fonts: drawn on the canvas and in the exported video, not used by the interface -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Anton&family=Bangers&family=Bebas+Neue&family=Luckiest+Guy&family=Oswald:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/family.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <link rel="icon" href="assets/topfratmranks-logo.svg" type="image/svg+xml">
+  <script src="js/i18n.js" defer></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <div class="editor-layout">
+  <header class="ss-topbar">
+    <a class="ss-topbar__home" href="https://kekkocoppola.github.io/ScrollStudio/" aria-label="ScrollStudio, torna all'hub" data-en-aria-label="ScrollStudio, back to the hub">
+      <img src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+    </a>
+    <span class="ss-topbar__sep" aria-hidden="true"></span>
+    <a class="ss-topbar__product" href="index.html">
+      <img src="assets/topfratmranks-logo.svg" alt="">
+      <span>TopFratmRanks</span>
+    </a>
+    <div class="ss-lang" role="group" aria-label="Lingua" data-en-aria-label="Language">
+      <button class="ss-lang__option" type="button" aria-pressed="true" data-lang="it">
+        <svg class="ss-lang__flag" viewBox="0 0 3 2" preserveAspectRatio="none" aria-hidden="true"><path fill="#009246" d="M0 0h1v2H0z"/><path fill="#F4F5F0" d="M1 0h1v2H1z"/><path fill="#CE2B37" d="M2 0h1v2H2z"/></svg>
+        IT
+      </button>
+      <button class="ss-lang__option" type="button" aria-pressed="false" data-lang="en">
+        <svg class="ss-lang__flag" viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><clipPath id="flag-uk-cross"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path fill="#012169" d="M0 0h60v30H0z"/><path stroke="#FFF" stroke-width="6" d="m0 0 60 30m0-30L0 30"/><path stroke="#C8102E" stroke-width="4" clip-path="url(#flag-uk-cross)" d="m0 0 60 30m0-30L0 30"/><path stroke="#FFF" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#C8102E" stroke-width="6" d="M30 0v30M0 15h60"/></svg>
+        EN
+      </button>
+    </div>
+  </header>
 
-    <!-- ==================== LEFT: EDITING TOOLS ==================== -->
-    <aside class="editor-sidebar">
-
-      <header class="sidebar-header">
-        <a href="index.html" class="logo">TopRankVids</a>
-        <span class="rank-display" id="rank-display">Ranking: —</span>
-      </header>
-
-      <div class="sidebar-content">
-
-        <!-- ===== SECTION: Title ===== -->
-        <section class="editor-section" id="section-title">
-          <div class="section-header" data-section="title">
-            <h2>🎯 Video Title</h2>
-            <span class="chevron">▼</span>
-          </div>
-          <div class="section-body">
-            <div class="input-group">
-              <label class="input-label" for="title-input">Title Text</label>
-              <input type="text" class="title-main-input" id="title-input"
-                     placeholder="e.g. Ranking Most Humiliating Ankle Breaker"
-                     autocomplete="off">
-            </div>
-
-            <div class="input-group">
-              <label class="input-label">Word Colors (click a word to change)</label>
-              <div class="title-words-container" id="title-words">
-                <span class="words-hint">Type a title above to color each word</span>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label class="input-label">Font &amp; Style</label>
-              <div class="title-controls">
-                <select class="select" id="font-select">
-                  <option value="Anton" selected>Anton</option>
-                  <option value="Bangers">Bangers</option>
-                  <option value="Bebas Neue">Bebas Neue</option>
-                  <option value="Luckiest Guy">Luckiest Guy</option>
-                  <option value="Oswald">Oswald</option>
-                  <option value="Montserrat">Montserrat</option>
-                  <option value="Impact">Impact</option>
-                  <option value="Arial Black">Arial Black</option>
-                </select>
-                <input type="number" class="input input-num" id="font-size" value="88" min="40" max="160" step="4" title="Font size (px)">
-                <button class="btn-style-toggle" id="btn-bold" title="Bold" type="button">B</button>
-                <button class="btn-style-toggle" id="btn-italic" title="Italic" type="button">I</button>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label class="input-label">Text Stroke</label>
-              <div class="stroke-controls">
-                <button class="toggle active" id="stroke-toggle" title="Toggle stroke" type="button"></button>
-                <input type="number" class="input input-num" id="stroke-width" value="8" min="1" max="24" step="1" title="Stroke width">
-                <input type="color" id="stroke-color" value="#000000" title="Stroke color">
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ===== SECTION: General Settings ===== -->
-        <section class="editor-section" id="section-settings">
-          <div class="section-header" data-section="settings">
-            <h2>⚙️ General Settings</h2>
-            <span class="chevron">▼</span>
-          </div>
-          <div class="section-body">
-            <div class="setting-row">
-              <label for="bg-color">Background Color</label>
-              <input type="color" id="bg-color" value="#000000">
-            </div>
-            <div class="setting-row">
-              <label for="clip-fit">Clip Size</label>
-              <select class="select" id="clip-fit">
-                <option value="fit" selected>Fit — show the whole clip</option>
-                <option value="fill">Fill — full width, cropped</option>
-              </select>
-            </div>
-            <div class="setting-row">
-              <label for="rank-number-size">Rank Number Size</label>
-              <input type="number" class="input input-num" id="rank-number-size" min="40" max="140" step="2" value="72">
-            </div>
-            <div class="setting-row">
-              <label for="rank-number-gap">Rank Number Spacing</label>
-              <input type="number" class="input input-num" id="rank-number-gap" min="70" max="340" step="5" value="150">
-            </div>
-            <div class="setting-row">
-              <label for="rank-color-mode">Rank Number Colors</label>
-              <select class="select" id="rank-color-mode">
-                <option value="auto" selected>Auto Gradient (Yellow→Red)</option>
-                <option value="single">Single Color</option>
-                <option value="custom">Custom Per Rank</option>
-              </select>
-            </div>
-            <div class="setting-row" id="rank-single-row" style="display:none;">
-              <label for="rank-single-color">Rank Color</label>
-              <input type="color" id="rank-single-color" value="#FFD700">
-            </div>
-            <div class="input-group" id="rank-custom-row" style="display:none;">
-              <label class="input-label">Color Per Rank</label>
-              <div class="rank-custom-colors" id="rank-custom-colors"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ===== SECTION: Publishing ===== -->
-        <section class="editor-section" id="section-publish">
-          <div class="section-header" data-section="publish">
-            <h2>📤 Publishing</h2>
-            <span class="chevron">▼</span>
-          </div>
-          <div class="section-body">
-            <div id="publish-not-configured" style="display:none;">
-              <div class="publish-warning">
-                ⚠ Publishing needs a one-time setup (free Google Client ID, ~15 min).
-              </div>
-              <button class="btn-connect btn-setup" id="btn-setup-open" type="button">⚙ Set up YouTube publishing</button>
-            </div>
-            <div id="publish-configured">
-              <div class="setting-row">
-                <label>YouTube Account</label>
-                <div class="yt-account" id="yt-account">
-                  <button class="btn-connect" id="btn-yt-connect" type="button">Connect YouTube</button>
-                </div>
-              </div>
-              <div class="input-group">
-                <label class="input-label" for="yt-title">YouTube Title <span style="text-transform:none;">(empty = ranking title + #Shorts)</span></label>
-                <input type="text" class="input" id="yt-title" maxlength="100" placeholder="Uses the ranking title if empty">
-              </div>
-              <div class="input-group">
-                <label class="input-label" for="yt-desc">Description</label>
-                <textarea class="input" id="yt-desc" rows="2">#Shorts</textarea>
-              </div>
-              <div class="setting-row">
-                <label for="yt-privacy">Privacy</label>
-                <select class="select" id="yt-privacy">
-                  <option value="public" selected>Public</option>
-                  <option value="unlisted">Unlisted</option>
-                  <option value="private">Private</option>
-                </select>
-              </div>
-              <button class="link-btn" id="btn-setup-edit" type="button">✎ Change Google Client ID</button>
-            </div>
-            <div class="coming-soon-row"><span>TikTok</span><span class="badge-soon">Coming soon</span></div>
-            <div class="coming-soon-row"><span>Instagram</span><span class="badge-soon">Coming soon</span></div>
-          </div>
-        </section>
-
-        <!-- ===== SECTION: Clips ===== -->
-        <section class="editor-section" id="section-clips">
-          <div class="section-header" data-section="clips">
-            <h2>🎬 Clips</h2>
-            <div class="section-header-actions">
-              <button class="btn-shuffle" id="btn-shuffle" type="button" title="Shuffle the play order (rank numbers stay put)">🔀 Shuffle</button>
-              <button class="btn-shuffle" id="btn-order-reset" type="button" title="Restore the default play order: last place first, #1 last">↺ Reset</button>
-              <span class="chevron">▼</span>
-            </div>
-          </div>
-          <div class="section-body">
-            <p class="playback-hint">Cards are in <strong>play order</strong> — drag them to change it. Use the <strong>Rank #</strong> menu on a card to change which number it reveals.</p>
-            <div id="clip-slots"></div>
-            <button class="btn-add-rank" id="btn-add-rank" type="button">+ Add Rank</button>
-          </div>
-        </section>
-
-
-
-      </div>
-
-      <!-- Export + Publish -->
-      <div class="export-section">
-        <div class="export-buttons">
-          <button class="btn-export" id="btn-export" disabled type="button">🚀 Generate Video Ranking</button>
-          <button class="btn-publish" id="btn-publish" disabled type="button" title="Generate the video first">📤 Publish</button>
-        </div>
-        <div class="export-progress" id="export-progress">
-          <div class="export-progress-bar">
-            <div class="export-progress-fill" id="export-progress-fill"></div>
-          </div>
-          <p class="export-status" id="export-status">Preparing…</p>
-        </div>
-      </div>
-    </aside>
-
-    <!-- ==================== RIGHT: PREVIEW ==================== -->
-    <main class="preview-panel">
-      <div class="preview-wrapper">
-        <div class="preview-canvas-container">
-          <canvas id="preview-canvas" width="1080" height="1920"></canvas>
-        </div>
-        <div class="preview-controls">
-          <button class="btn-play" id="btn-play" disabled title="Play preview" type="button">▶</button>
-          <div class="progress-bar-container" id="progress-bar">
-            <div class="progress-bar-track">
-              <div class="progress-bar-fill" id="progress-fill"></div>
-            </div>
-            <div class="progress-bar-thumb" id="progress-thumb"></div>
-          </div>
-          <span class="time-display" id="time-display">0:00 / 0:00</span>
-        </div>
-      </div>
-    </main>
-
+  <div class="ss-head">
+    <h1 class="ss-head__title" data-en="Build your ranking">Crea la tua classifica</h1>
+    <p class="ss-head__lede" data-en="Pick how many spots, load your clips and build your top list in seconds.">Scegli quante posizioni, carica le clip e monta la tua top in pochi secondi.</p>
   </div>
 
+  <main class="ss-editor">
+
+    <!-- ==================== Settings panel ==================== -->
+    <aside class="ss-panel" aria-label="Impostazioni" data-en-aria-label="Settings">
+
+      <!-- ===== SECTION: Clips ===== -->
+      <details class="ss-section" id="section-clips" open>
+        <summary>
+          <span data-en="Clips">Clip</span>
+          <span class="ss-section__count" id="rank-display">Classifica: —</span>
+          <svg class="ss-icon ss-section__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>
+        </summary>
+        <div class="ss-section__body">
+          <div class="clip-tools">
+            <button class="ss-btn ss-btn--sm" id="btn-shuffle" type="button"
+                    title="Mescola l'ordine di riproduzione (i numeri restano al loro posto)" data-en-title="Shuffle the play order (rank numbers stay put)">
+              <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 3.5h2l5 5h2M1.5 8.5h2L5 7M7 5l1.5-1.5h2M9 2l1.5 1.5L9 5M9 7l1.5 1.5L9 10"/></svg>
+              <span data-en="Shuffle">Mescola</span>
+            </button>
+            <button class="ss-btn ss-btn--sm" id="btn-order-reset" type="button"
+                    title="Ripristina l'ordine predefinito: prima l'ultima posizione, il #1 per ultimo" data-en-title="Restore the default play order: last place first, #1 last">
+              <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6A4.5 4.5 0 1 0 6 1.5a4.9 4.9 0 0 0-3.4 1.4L1.5 4M1.5 1.5V4H4"/></svg>
+              <span data-en="Reset">Ripristina</span>
+            </button>
+          </div>
+          <ol class="ss-list" id="clip-slots"></ol>
+          <button class="ss-btn ss-btn--sm" id="btn-add-rank" type="button">
+            <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2v8M2 6h8"/></svg>
+            <span data-en="Add Rank">Aggiungi posizione</span>
+          </button>
+        </div>
+      </details>
+
+      <!-- ===== SECTION: Title ===== -->
+      <details class="ss-section" id="section-title" open>
+        <summary>
+          <span data-en="Video Title">Titolo del video</span>
+          <svg class="ss-icon ss-section__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>
+        </summary>
+        <div class="ss-section__body">
+          <label class="ss-field">
+            <span class="ss-label" data-en="Title Text">Testo del titolo</span>
+            <input type="text" class="ss-input" id="title-input"
+                   placeholder="es. Classifica degli ankle breaker più umilianti"
+                   data-en-placeholder="e.g. Ranking Most Humiliating Ankle Breaker"
+                   autocomplete="off">
+          </label>
+
+          <div class="ss-field">
+            <span class="ss-label" id="title-words-label" data-en="Word Colors (click a word to change)">Colori delle parole (clicca una parola per cambiarlo)</span>
+            <div class="ss-words" id="title-words" role="group" aria-labelledby="title-words-label">
+              <span class="ss-hint">Scrivi un titolo qui sopra per colorare ogni parola</span>
+            </div>
+          </div>
+
+          <div class="ss-field">
+            <span class="ss-label" id="font-style-label" data-en="Font &amp; Style">Font e stile</span>
+            <div class="field-row">
+              <select class="ss-select" id="font-select" aria-labelledby="font-style-label">
+                <option value="Anton" selected>Anton</option>
+                <option value="Bangers">Bangers</option>
+                <option value="Bebas Neue">Bebas Neue</option>
+                <option value="Luckiest Guy">Luckiest Guy</option>
+                <option value="Oswald">Oswald</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Impact">Impact</option>
+                <option value="Arial Black">Arial Black</option>
+              </select>
+              <input type="number" class="ss-input ss-input--num" id="font-size" value="88" min="40" max="160" step="4"
+                     title="Dimensione del font (px)" data-en-title="Font size (px)"
+                     aria-label="Dimensione del font (px)" data-en-aria-label="Font size (px)">
+              <span class="ss-segmented" role="group" aria-labelledby="font-style-label">
+                <button class="ss-segmented__option" id="btn-bold" type="button" aria-pressed="false"
+                        aria-label="Grassetto" data-en-aria-label="Bold" title="Grassetto" data-en-title="Bold">
+                  <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 2h3a2 2 0 0 1 0 4h-3zM3.5 6h3.5a2 2 0 0 1 0 4H3.5z"/></svg>
+                </button>
+                <button class="ss-segmented__option" id="btn-italic" type="button" aria-pressed="false"
+                        aria-label="Corsivo" data-en-aria-label="Italic" title="Corsivo" data-en-title="Italic">
+                  <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M5 2h4M3 10h4M7 2 5 10"/></svg>
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <div class="ss-field">
+            <span class="ss-label" data-en="Text Stroke">Contorno del testo</span>
+            <div class="field-row">
+              <input type="checkbox" class="ss-switch" id="stroke-toggle" checked
+                     title="Attiva o disattiva il contorno" data-en-title="Toggle stroke"
+                     aria-label="Attiva o disattiva il contorno" data-en-aria-label="Toggle stroke">
+              <input type="number" class="ss-input ss-input--num" id="stroke-width" value="8" min="1" max="24" step="1"
+                     title="Spessore del contorno" data-en-title="Stroke width"
+                     aria-label="Spessore del contorno" data-en-aria-label="Stroke width">
+              <input type="color" class="ss-swatch" id="stroke-color" value="#000000"
+                     title="Colore del contorno" data-en-title="Stroke color"
+                     aria-label="Colore del contorno" data-en-aria-label="Stroke color">
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ===== SECTION: General Settings ===== -->
+      <details class="ss-section" id="section-settings" open>
+        <summary>
+          <span data-en="General Settings">Impostazioni generali</span>
+          <svg class="ss-icon ss-section__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>
+        </summary>
+        <div class="ss-section__body">
+          <div class="ss-row">
+            <label class="ss-row__label" for="bg-color" data-en="Background Color">Colore di sfondo</label>
+            <input type="color" class="ss-swatch" id="bg-color" value="#000000">
+          </div>
+          <label class="ss-field">
+            <span class="ss-label" data-en="Clip Size">Dimensione clip</span>
+            <select class="ss-select" id="clip-fit">
+              <option value="fit" selected data-en="Fit — show the whole clip">Adatta — mostra tutta la clip</option>
+              <option value="fill" data-en="Fill — full width, cropped">Riempi — tutta la larghezza, ritagliata</option>
+            </select>
+          </label>
+          <div class="ss-row">
+            <label class="ss-row__label" for="rank-number-size" data-en="Rank Number Size">Dimensione dei numeri</label>
+            <input type="number" class="ss-input ss-input--num" id="rank-number-size" min="40" max="140" step="2" value="72">
+          </div>
+          <div class="ss-row">
+            <label class="ss-row__label" for="rank-number-gap" data-en="Rank Number Spacing">Spaziatura dei numeri</label>
+            <input type="number" class="ss-input ss-input--num" id="rank-number-gap" min="70" max="340" step="5" value="150">
+          </div>
+          <label class="ss-field">
+            <span class="ss-label" data-en="Rank Number Colors">Colori dei numeri</span>
+            <select class="ss-select" id="rank-color-mode">
+              <option value="auto" selected data-en="Auto Gradient (Yellow→Red)">Sfumatura automatica (giallo→rosso)</option>
+              <option value="single" data-en="Single Color">Colore unico</option>
+              <option value="custom" data-en="Custom Per Rank">Personalizzato per posizione</option>
+            </select>
+          </label>
+          <div class="ss-row" id="rank-single-row" style="display:none;">
+            <label class="ss-row__label" for="rank-single-color" data-en="Rank Color">Colore dei numeri</label>
+            <input type="color" class="ss-swatch" id="rank-single-color" value="#FFD700">
+          </div>
+          <div class="ss-field" id="rank-custom-row" style="display:none;">
+            <span class="ss-label" data-en="Color Per Rank">Colore per posizione</span>
+            <div class="ss-swatch-list" id="rank-custom-colors"></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ===== SECTION: Publishing ===== -->
+      <details class="ss-section" id="section-publish" open>
+        <summary>
+          <span data-en="Publishing">Pubblicazione</span>
+          <svg class="ss-icon ss-section__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>
+        </summary>
+        <div class="ss-section__body">
+          <div class="stack" id="publish-not-configured" style="display:none;">
+            <p class="ss-note" data-en="Publishing needs a one-time setup (free Google Client ID, ~15 min).">La pubblicazione richiede una configurazione una tantum (Client ID Google gratuito, ~15 min).</p>
+            <button class="ss-btn ss-btn--block" id="btn-setup-open" type="button" data-en="Set up YouTube publishing">Configura la pubblicazione su YouTube</button>
+          </div>
+          <div class="stack" id="publish-configured">
+            <div class="ss-row">
+              <span class="ss-row__label" data-en="YouTube Account">Account YouTube</span>
+              <div class="ss-account-slot" id="yt-account">
+                <button class="ss-btn ss-btn--sm yt-connect" id="btn-yt-connect" type="button" data-en="Connect YouTube">Collega YouTube</button>
+              </div>
+            </div>
+            <p class="ss-note ss-note--error" id="yt-error" role="alert" hidden></p>
+            <label class="ss-field">
+              <span class="ss-label" data-en="YouTube Title">Titolo YouTube</span>
+              <input type="text" class="ss-input" id="yt-title" maxlength="100"
+                     placeholder="Se vuoto usa il titolo della classifica" data-en-placeholder="Uses the ranking title if empty">
+              <span class="ss-hint" data-en="(empty = ranking title + #Shorts)">(vuoto = titolo della classifica + #Shorts)</span>
+            </label>
+            <label class="ss-field">
+              <span class="ss-label" data-en="Description">Descrizione</span>
+              <textarea class="ss-textarea" id="yt-desc" rows="2">#Shorts</textarea>
+            </label>
+            <label class="ss-field">
+              <span class="ss-label">Privacy</span>
+              <select class="ss-select" id="yt-privacy">
+                <option value="public" selected data-en="Public">Pubblico</option>
+                <option value="unlisted" data-en="Unlisted">Non in elenco</option>
+                <option value="private" data-en="Private">Privato</option>
+              </select>
+            </label>
+            <button class="ss-link" id="btn-setup-edit" type="button" data-en="Change Google Client ID">Cambia Client ID Google</button>
+          </div>
+          <div class="ss-row"><span class="ss-row__label">TikTok</span><span class="ss-badge" data-en="Coming soon">Presto</span></div>
+          <div class="ss-row"><span class="ss-row__label">Instagram</span><span class="ss-badge" data-en="Coming soon">Presto</span></div>
+        </div>
+      </details>
+
+      <!-- ===== SECTION: Export + Publish ===== -->
+      <details class="ss-section" id="section-export" open>
+        <summary>
+          <span data-en="Export">Esporta</span>
+          <svg class="ss-icon ss-section__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>
+        </summary>
+        <div class="ss-section__body">
+          <!-- shown (.visible) once a generation starts -->
+          <div class="stack export-progress" id="export-progress">
+            <div class="ss-progress">
+              <div class="ss-progress__head">
+                <span class="ss-progress__value" id="export-progress-value">0%</span>
+              </div>
+              <div class="ss-progress__track"><div class="ss-progress__fill" id="export-progress-fill"></div></div>
+            </div>
+            <p class="ss-note" id="export-status" role="status">Preparazione…</p>
+          </div>
+          <button class="ss-btn ss-btn--primary ss-btn--block" id="btn-export" disabled type="button">
+            <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2v6M3.5 5.5 6 8l2.5-2.5M2 10h8"/></svg>
+            <span id="btn-export-label">Genera il video classifica</span>
+          </button>
+          <button class="ss-btn ss-btn--sm" id="btn-publish" disabled type="button" title="Prima genera il video">
+            <span id="btn-publish-label">Pubblica</span>
+          </button>
+        </div>
+      </details>
+    </aside>
+
+    <!-- ==================== Stage: the preview hangs on the wall ==================== -->
+    <section class="ss-stage" aria-label="Anteprima" data-en-aria-label="Preview">
+      <div class="ss-frame">
+        <canvas id="preview-canvas" width="1080" height="1920"></canvas>
+      </div>
+      <div class="ss-timeline">
+        <div class="ss-timeline__bar">
+          <button class="ss-icon-btn" id="btn-play" type="button" disabled aria-label="Riproduci anteprima" title="Riproduci anteprima">
+            <svg class="ss-icon play-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z"/></svg>
+            <svg class="ss-icon pause-icon" viewBox="0 0 12 12" aria-hidden="true" hidden><path d="M4 2.5v7M8 2.5v7"/></svg>
+          </button>
+          <span class="ss-time" id="time-display"><b>0:00</b> / 0:00</span>
+        </div>
+        <div class="ss-timeline__lanes" id="progress-bar">
+          <div class="ss-scrub" id="progress-scrub" role="slider" tabindex="0"
+               aria-label="Avanzamento" data-en-aria-label="Playback position"
+               aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00 / 0:00">
+            <span class="ss-scrub__fill" id="progress-fill"></span>
+          </div>
+          <span class="ss-playhead" id="progress-thumb" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="ss-footer">
+    <img src="assets/scrollstudio-wordmark.svg" alt="ScrollStudio" width="796" height="404">
+    <span>© 2026</span>
+  </footer>
+
   <!-- Publish modal -->
-  <div class="modal-overlay" id="publish-modal" style="display:none;">
-    <div class="modal-card">
-      <button class="modal-close" id="publish-close" type="button" title="Close">✕</button>
+  <div class="ss-overlay" id="publish-modal" style="display:none;">
+    <div class="ss-modal" role="dialog" aria-modal="true" aria-labelledby="ps-heading">
+      <button class="ss-icon-btn ss-icon-btn--bare ss-modal__close" id="publish-close" type="button"
+              aria-label="Chiudi" data-en-aria-label="Close" title="Chiudi" data-en-title="Close">
+        <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9"/></svg>
+      </button>
 
       <!-- Step 1: summary -->
       <div class="modal-step" id="publish-step-summary">
-        <h3>📤 Publish to YouTube</h3>
-        <dl class="publish-summary">
-          <dt>Title</dt><dd id="ps-title">—</dd>
-          <dt>Privacy</dt><dd id="ps-privacy">—</dd>
-          <dt>File</dt><dd id="ps-file">—</dd>
-          <dt>Channel</dt><dd id="ps-channel">—</dd>
-        </dl>
-        <div class="modal-actions">
-          <button class="btn-secondary" id="ps-cancel" type="button">Cancel</button>
-          <button class="btn-primary-sm" id="ps-connect" type="button" style="display:none;">Sign in with Google</button>
-          <button class="btn-primary-sm" id="ps-continue" type="button">Continue →</button>
+        <h2 class="ss-modal__title" id="ps-heading" data-en="Publish to YouTube">Pubblica su YouTube</h2>
+        <div class="ss-modal__body">
+          <dl class="ss-summary">
+            <dt data-en="Title">Titolo</dt><dd id="ps-title">—</dd>
+            <dt>Privacy</dt><dd id="ps-privacy">—</dd>
+            <dt>File</dt><dd id="ps-file">—</dd>
+            <dt data-en="Channel">Canale</dt><dd id="ps-channel">—</dd>
+          </dl>
+          <p class="ss-note ss-note--error" id="ps-error" role="alert" hidden></p>
+        </div>
+        <div class="ss-modal__actions">
+          <button class="ss-btn" id="ps-cancel" type="button" data-en="Cancel">Annulla</button>
+          <button class="ss-btn ss-btn--primary" id="ps-connect" type="button" style="display:none;" data-en="Sign in with Google">Accedi con Google</button>
+          <button class="ss-btn ss-btn--primary" id="ps-continue" type="button">
+            <span data-en="Continue">Continua</span>
+            <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+          </button>
         </div>
       </div>
 
       <!-- Step 2: final confirmation -->
       <div class="modal-step" id="publish-step-confirm" style="display:none;">
-        <h3>⚠ Final confirmation</h3>
-        <p class="confirm-text" id="pc-text">The video will be published…</p>
-        <div class="modal-actions">
-          <button class="btn-secondary" id="pc-back" type="button">← Back</button>
-          <button class="btn-danger" id="pc-publish" type="button">Publish now</button>
+        <h2 class="ss-modal__title" id="pc-heading" data-en="Final confirmation">Conferma finale</h2>
+        <div class="ss-modal__body"><p id="pc-text">Il video verrà pubblicato…</p></div>
+        <div class="ss-modal__actions">
+          <button class="ss-btn" id="pc-back" type="button">
+            <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M10 6H2M5 3 2 6l3 3"/></svg>
+            <span data-en="Back">Indietro</span>
+          </button>
+          <button class="ss-btn ss-btn--primary" id="pc-publish" type="button" data-en="Publish now">Pubblica ora</button>
         </div>
       </div>
 
       <!-- Step 3: progress -->
       <div class="modal-step" id="publish-step-progress" style="display:none;">
-        <h3>Uploading…</h3>
-        <div class="export-progress-bar"><div class="export-progress-fill" id="pp-fill"></div></div>
-        <p class="export-status" id="pp-status">Starting…</p>
+        <h2 class="ss-modal__title" id="pp-heading" data-en="Uploading…">Caricamento…</h2>
+        <div class="ss-modal__body">
+          <div class="ss-progress">
+            <div class="ss-progress__track"><div class="ss-progress__fill" id="pp-fill"></div></div>
+          </div>
+          <p class="ss-hint" id="pp-status" role="status">Avvio…</p>
+        </div>
       </div>
 
       <!-- Step 4: result -->
       <div class="modal-step" id="publish-step-result" style="display:none;">
-        <h3 id="pr-title">Done</h3>
-        <p class="result-text" id="pr-text"></p>
-        <div class="modal-actions">
-          <button class="btn-secondary" id="pr-close" type="button">Close</button>
-          <button class="btn-danger" id="pr-retry" type="button" style="display:none;">Retry</button>
-          <a class="btn-primary-sm" id="pr-link" href="#" target="_blank" rel="noopener" style="display:none;">Open video ↗</a>
+        <h2 class="ss-modal__title" id="pr-title">Fatto</h2>
+        <div class="ss-modal__body"><p id="pr-text"></p></div>
+        <div class="ss-modal__actions">
+          <button class="ss-btn" id="pr-close" type="button" data-en="Close">Chiudi</button>
+          <button class="ss-btn ss-btn--primary" id="pr-retry" type="button" style="display:none;" data-en="Retry">Riprova</button>
+          <a class="ss-btn ss-btn--primary" id="pr-link" href="#" target="_blank" rel="noopener" style="display:none;">
+            <span data-en="Open video">Apri il video</span>
+            <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4.5 3H9v4.5"/></svg>
+          </a>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Publishing setup wizard -->
-  <div class="modal-overlay" id="setup-modal" style="display:none;">
-    <div class="modal-card setup-card">
-      <button class="modal-close" id="setup-close" type="button" title="Close">✕</button>
-      <h3>⚙ YouTube publishing setup</h3>
-      <p class="setup-intro">One-time, free, ~15 minutes. The Client ID is a <strong>public</strong> identifier — no secret involved.</p>
-      <div class="setup-file-warning" id="setup-file-warning" style="display:none;">
-        ⚠ You opened the app from a local file (<code>file://</code>). Google sign-in only works from
-        a real web address — use the GitHub Pages site or a local server (<code>serve.ps1</code>).
+  <div class="ss-overlay" id="setup-modal" style="display:none;">
+    <div class="ss-modal ss-modal--scroll" role="dialog" aria-modal="true" aria-labelledby="setup-heading">
+      <button class="ss-icon-btn ss-icon-btn--bare ss-modal__close" id="setup-close" type="button"
+              aria-label="Chiudi" data-en-aria-label="Close" title="Chiudi" data-en-title="Close">
+        <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9"/></svg>
+      </button>
+      <h2 class="ss-modal__title" id="setup-heading" data-en="YouTube publishing setup">Configurazione della pubblicazione su YouTube</h2>
+      <div class="ss-modal__body">
+        <p>
+          <span data-en="One-time, free, ~15 minutes. The Client ID is a">Una tantum, gratis, ~15 minuti. Il Client ID è un identificativo</span>
+          <b data-en="public">pubblico</b><span data-en=" identifier — no secret involved.">: nessun segreto in gioco.</span>
+        </p>
+        <p class="ss-note" id="setup-file-warning" style="display:none;"><span>
+          <span data-en="You opened the app from a local file (">Hai aperto l'app da un file locale (</span><code class="ss-code">file://</code><span data-en="). Google sign-in only works from a real web address — use the GitHub Pages site or a local server (">). L'accesso con Google funziona solo da un vero indirizzo web: usa il sito su GitHub Pages o un server locale (</span><code class="ss-code">serve.ps1</code>).
+        </span></p>
+
+        <ol class="ss-howto">
+          <li><p>
+            <span data-en="Open the">Apri la</span>
+            <a class="ss-link ss-link--inline" href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">Google Cloud Console<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4.5 3H9v4.5"/></svg></a>
+            <span data-en="and create a project (any name, e.g.">e crea un progetto (nome qualsiasi, es.</span>
+            <em>TopFratmRanks</em>).
+          </p></li>
+          <li><p>
+            <span data-en="Enable the">Attiva la</span>
+            <a class="ss-link ss-link--inline" href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">YouTube Data API v3<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4.5 3H9v4.5"/></svg></a>.
+          </p></li>
+          <li><p>
+            In
+            <a class="ss-link ss-link--inline" href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener"><span data-en="OAuth consent screen">Schermata consenso OAuth</span><svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4.5 3H9v4.5"/></svg></a><span data-en=": choose">: scegli</span>
+            <b data-en="External">Esterno</b><span data-en=", fill the minimum fields, then under">, compila i campi minimi, poi in</span>
+            <b data-en="Test users">Utenti di test</b>
+            <span data-en="add the Google account(s) that will publish (your own email).">aggiungi gli account Google che pubblicheranno (la tua email).</span>
+          </p></li>
+          <li>
+            <p>
+              In
+              <a class="ss-link ss-link--inline" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener"><span data-en="Credentials">Credenziali</span><svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4.5 3H9v4.5"/></svg></a>:
+              <em data-en="Create Credentials → OAuth client ID → Web application">Crea credenziali → ID client OAuth → Applicazione web</em>.
+              <span data-en="Under">In</span>
+              <b data-en="Authorized JavaScript origins">Origini JavaScript autorizzate</b>
+              <span data-en="add exactly:">aggiungi esattamente:</span>
+            </p>
+            <div class="setup-copy">
+              <code class="ss-code ss-code--block" id="setup-origin">…</code>
+              <button class="ss-icon-btn" id="setup-copy-origin" type="button"
+                      aria-label="Copia" data-en-aria-label="Copy" title="Copia" data-en-title="Copy">
+                <svg class="ss-icon copy-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 4.5h5v5h-5zM2.5 7.5v-5h5"/></svg>
+                <svg class="ss-icon check-icon" viewBox="0 0 12 12" aria-hidden="true" hidden><path d="m2.5 6.5 2.5 2.5 4.5-6"/></svg>
+              </button>
+            </div>
+          </li>
+          <li>
+            <p>
+              <span data-en="Copy the generated">Copia il</span>
+              <b>Client ID</b>
+              <span data-en="(ends in">generato (finisce con</span>
+              <code class="ss-code">.apps.googleusercontent.com</code><span data-en=") and paste it here:">) e incollalo qui:</span>
+            </p>
+            <input type="text" class="ss-input" id="setup-client-id"
+                   placeholder="1234567890-xxxxxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false"
+                   aria-label="Client ID">
+            <p class="ss-note ss-note--error" id="setup-error" role="alert" style="display:none;"></p>
+          </li>
+        </ol>
       </div>
 
-      <ol class="setup-steps">
-        <li>
-          Open the <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">Google Cloud Console ↗</a>
-          and create a project (any name, e.g. <em>TopRankVids</em>).
-        </li>
-        <li>
-          Enable the <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">YouTube Data API v3 ↗</a>.
-        </li>
-        <li>
-          In <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener">OAuth consent screen ↗</a>:
-          choose <strong>External</strong>, fill the minimum fields, then under <strong>Test users</strong> add the
-          Google account(s) that will publish (your own email).
-        </li>
-        <li>
-          In <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials ↗</a>:
-          <em>Create Credentials → OAuth client ID → Web application</em>.<br>
-          Under <strong>Authorized JavaScript origins</strong> add exactly:
-          <div class="code-chip-row">
-            <code class="code-chip" id="setup-origin">…</code>
-            <button class="btn-copy" id="setup-copy-origin" type="button" title="Copy">📋</button>
-          </div>
-        </li>
-        <li>
-          Copy the generated <strong>Client ID</strong> (ends in <code>.apps.googleusercontent.com</code>) and paste it here:
-          <input type="text" class="input setup-cid-input" id="setup-client-id"
-                 placeholder="1234567890-xxxxxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
-          <p class="setup-error" id="setup-error" style="display:none;"></p>
-        </li>
-      </ol>
-
-      <div class="modal-actions">
-        <button class="btn-secondary" id="setup-cancel" type="button">Cancel</button>
-        <button class="btn-primary-sm" id="setup-save" type="button">Save &amp; enable</button>
+      <div class="ss-modal__actions">
+        <button class="ss-btn" id="setup-cancel" type="button" data-en="Cancel">Annulla</button>
+        <button class="ss-btn ss-btn--primary" id="setup-save" type="button" data-en="Save &amp; enable">Salva e attiva</button>
       </div>
-      <p class="setup-footnote">Full guide with troubleshooting: <strong>docs/YOUTUBE_SETUP.md</strong> in the repository.</p>
+      <p class="ss-hint setup-footnote">
+        <span data-en="Full guide with troubleshooting:">Guida completa con soluzione dei problemi:</span>
+        <code class="ss-code">docs/YOUTUBE_SETUP.md</code>
+        <span data-en="in the repository.">nel repository.</span>
+      </p>
     </div>
   </div>
 
@@ -325,10 +449,12 @@
   <input type="color" id="hidden-color-picker" style="position:fixed;top:-100px;left:-100px;opacity:0;pointer-events:none;">
   <input type="file" id="hidden-file-input" accept="video/*" style="display:none;">
 
-  <!-- Scripts (classic scripts, order matters) -->
+  <!-- Scripts (classic scripts, order matters; i18n.js is deferred in <head>) -->
   <script src="js/vendor/mp4-muxer.js"></script>
   <script src="js/config.js"></script>
   <script src="js/state.js"></script>
+  <script src="js/strings.js"></script>
+  <script src="js/modal.js"></script>
   <script src="js/link-import.js"></script>
   <script src="js/renderer.js"></script>
   <script src="js/preview.js"></script>

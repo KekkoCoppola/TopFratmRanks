@@ -7,7 +7,7 @@ not a secret). This takes ~15 minutes and costs nothing.
 ## 1. Create the Google Cloud project
 
 1. Go to <https://console.cloud.google.com/> and sign in.
-2. Top bar → project selector → **New Project** → name it (e.g. `TopRankVids`) → Create.
+2. Top bar → project selector → **New Project** → name it (e.g. `TopFratmRanks`) → Create.
 
 ## 2. Enable the YouTube Data API v3
 
@@ -18,7 +18,7 @@ not a secret). This takes ~15 minutes and costs nothing.
 
 1. **APIs & Services → OAuth consent screen**.
 2. User type: **External** → Create.
-3. Fill the minimum: app name (`TopRankVids`), your email as support + developer contact. Save.
+3. Fill the minimum: app name (`TopFratmRanks`), your email as support + developer contact. Save.
 4. **Scopes**: you can skip adding scopes here (the app requests them at runtime).
 5. **Test users**: add the Google account(s) that will publish (your own email!).
    While the app is in *Testing* mode, **only these accounts can sign in** (max 100).

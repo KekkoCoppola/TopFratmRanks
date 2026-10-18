@@ -9,14 +9,14 @@
   for (var n = 1; n <= 10; n++) {
     (function (num) {
       var btn = document.createElement('button');
-      btn.className = 'rank-btn';
+      btn.className = 'ss-segmented__option';
       btn.type = 'button';
       btn.textContent = num;
+      btn.setAttribute('aria-pressed', 'false');
       btn.addEventListener('click', function () {
         selected = num;
-        var all = grid.querySelectorAll('.rank-btn');
-        for (var i = 0; i < all.length; i++) all[i].classList.remove('selected');
-        btn.classList.add('selected');
+        var all = grid.querySelectorAll('.ss-segmented__option');
+        for (var i = 0; i < all.length; i++) all[i].setAttribute('aria-pressed', String(all[i] === btn));
         startBtn.disabled = false;
       });
       grid.appendChild(btn);

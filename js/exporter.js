@@ -32,7 +32,7 @@
       }
       var timer = setTimeout(function () {
         video.removeEventListener('seeked', onSeeked);
-        reject(new Error('Seek timed out while reading a clip.'));
+        reject(new Error(TRV.t('errSeek')));
       }, 10000);
       function onSeeked() {
         clearTimeout(timer);
@@ -108,9 +108,9 @@
 
   async function exportMp4(tl, onProgress) {
     var videoCfg = await pickVideoConfig();
-    if (!videoCfg) throw new Error('H.264 encoding not supported here.');
+    if (!videoCfg) throw new Error(TRV.t('errNoH264'));
 
-    onProgress({ stage: 'Preparing audio…', pct: 0.02 });
+    onProgress({ stage: TRV.t('prepAudio'), pct: 0.02 });
     var audioPick = await pickAudioConfig();
     var audioBuffer = audioPick ? await renderAudioTimeline(tl) : null;
 
@@ -169,8 +169,7 @@
         }
         if (frame % 10 === 0) {
           onProgress({
-            stage: 'Rendering clip ' + (s + 1) + '/' + tl.segs.length +
-                   ' — frame ' + (frame + 1) + '/' + totalFrames,
+            stage: TRV.t('renderingFrame', { s: s + 1, n: tl.segs.length, f: frame + 1, total: totalFrames }),
             pct: 0.05 + 0.8 * (frame / totalFrames)
           });
         }
@@ -182,7 +181,7 @@
 
     // --- audio ---
     if (audioPick && audioBuffer) {
-      onProgress({ stage: 'Encoding audio…', pct: 0.88 });
+      onProgress({ stage: TRV.t('encodingAudio'), pct: 0.88 });
       var audioError = null;
       var audioEncoder = new AudioEncoder({
         output: function (chunk, meta) { muxer.addAudioChunk(chunk, meta); },
@@ -219,7 +218,7 @@
       if (audioError) throw audioError;
     }
 
-    onProgress({ stage: 'Finalizing MP4…', pct: 0.97 });
+    onProgress({ stage: TRV.t('finalizing'), pct: 0.97 });
     muxer.finalize();
     var blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
     var filename = slugify(TRV.state.title.text) + '.mp4';
@@ -247,7 +246,7 @@
   function exportRealtime(tl, onProgress) {
     return new Promise(function (resolve, reject) {
       var mime = pickRecorderMime();
-      if (!mime) { reject(new Error('No supported recording format in this browser.')); return; }
+      if (!mime) { reject(new Error(TRV.t('errNoRecorder'))); return; }
       var isMp4 = mime.indexOf('mp4') !== -1;
 
       var canvas = document.createElement('canvas');
@@ -286,7 +285,7 @@
         TRV.emitChange(); // lets the Publish button light up
         resolve({ filename: filename });
       };
-      recorder.onerror = function (e) { reject(e.error || new Error('Recording failed.')); };
+      recorder.onerror = function (e) { reject(e.error || new Error(TRV.t('errRecording'))); };
 
       var segIndex = 0;
       var revealedSet = new Set();
@@ -302,7 +301,7 @@
         });
         var t = seg ? seg.start + players[segIndex].currentTime : tl.total;
         onProgress({
-          stage: 'Recording in realtime… ' + Math.round(t) + 's / ' + Math.round(tl.total) + 's',
+          stage: TRV.t('recordingRealtime', { t: Math.round(t), total: Math.round(tl.total) }),
           pct: Math.min(0.98, t / tl.total)
         });
         requestAnimationFrame(drawLoop);
@@ -332,7 +331,7 @@
   TRV.exportVideo = async function (onProgress) {
     onProgress = onProgress || function () {};
     var tl = TRV.preview.getTimeline();
-    if (!tl.segs.length) throw new Error('Load at least one clip first.');
+    if (!tl.segs.length) throw new Error(TRV.t('errLoadClipFirst'));
 
     var canWebCodecs = typeof VideoEncoder !== 'undefined' && typeof Mp4Muxer !== 'undefined';
     if (canWebCodecs) {
@@ -340,7 +339,7 @@
         return await exportMp4(tl, onProgress);
       } catch (e) {
         console.warn('WebCodecs export failed, falling back to realtime recording:', e);
-        onProgress({ stage: 'Fast export unavailable — recording in realtime instead…', pct: 0 });
+        onProgress({ stage: TRV.t('fastUnavailable'), pct: 0 });
       }
     }
     return exportRealtime(tl, onProgress);
