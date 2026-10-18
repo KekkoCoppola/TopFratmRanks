@@ -24,7 +24,7 @@ Nato dal redesign di TopFratmRanks (branch `redesign/scrollstudio`). Da portare 
 
 | Caso | Proposta |
 |---|---|
-| App senza voci di menu | `.ss-topbar:not(:has(.ss-topbar__nav)) .ss-lang { margin-left: auto }`; su telefono `padding-bottom: var(--s-6)` alla topbar, se no il titolo finisce sotto il logo |
+| App senza voci di menu | `.ss-topbar:not(:has(.ss-topbar__nav)) .ss-lang { margin-left: auto }`; su telefono, con il kit 1.1, `row-gap: var(--s-1)` (la seconda riga è lo switch del tema; prima era `padding-bottom: var(--s-6)`, se no il titolo finiva sotto il logo) |
 | `.ss-swatch` e `.ss-switch` non hanno hover | swatch: anello `--ink-500`; switch: manopola con `--shadow-raise-hover` |
 | `.ss-icon-btn` non ha stato disattivo | come `.ss-btn:disabled` |
 | Timeline senza segmenti | lo scrub è alto 14px: banda invisibile di `--s-2` sopra e sotto (`.ss-timeline__lanes::before`) per arrivare a 28px; `cursor: grabbing` durante il trascinamento |
@@ -33,12 +33,14 @@ Nato dal redesign di TopFratmRanks (branch `redesign/scrollstudio`). Da portare 
 | Evidenza nel testo | `.ss-hint b`, `.ss-note b`, `.ss-modal__body b/em`: `--ink-900`, peso e stile normali |
 | Badge con icona | `.ss-badge:has(.ss-icon) { gap: var(--s-1) }` |
 | `hidden` sui componenti | `.ss-note` è `display: flex` e vince sull'attributo `hidden`: nel kit serve `[hidden] { display: none !important }` (l'app l'ha in `style.css`) |
+| **N16** Editor su schermi larghi | `.ss-editor` prende tutta la parete: a 1600px la colonna dello stage è larga ~1150px e l'anteprima (max 300px) resta lontana dal pannello e fuori asse rispetto al titolo. Sopra 860px: `grid-template-columns: minmax(280px, var(--panel-w)) minmax(0, var(--stage-w)); justify-content: center` → pannello + stage sono un gruppo centrato sotto il titolo; la pagina resta larga uguale, la luce dello stage non si taglia |
 
 ## Token aggiunti
 
 | Token | Valore | Motivo |
 |---|---|---|
 | `--panel-w` | 340px | la colonna massima del pannello di `.ss-editor`, usata anche per il foglio della landing; oggi nel kit è un numero dentro `minmax(280px, 340px)` |
+| `--stage-w` | 560px | la colonna massima dello stage su schermi larghi (N16): la larghezza massima di `.ss-timeline`, oggi un numero nel kit |
 
 ## Scelte di TopFratmRanks da valutare per tutta la famiglia
 
@@ -56,6 +58,7 @@ Se l'hub li adotta, vanno spostati da "scelte dell'app" alle ricette di `.ss-btn
 - **`hidden` sugli SVG.** `svg.hidden = true` non fa nulla (la proprietà esiste solo sugli elementi HTML): per alternare icone usare `toggleAttribute('hidden')`. Utile come nota nello specimen.
 - **Ordine degli script.** Con `i18n.js` in `defer`, gli script dell'app partono prima: i testi creati dal JS devono partire in italiano e ridisegnarsi su `ss:lang`.
 - **Testo minimo.** `--fs-xs` (11px) è sotto la soglia di 12px segnalata dagli strumenti di audit per il testo corrente; nel kit è riservato a etichette, meta e badge, ma conviene dirlo esplicitamente in `FAMILY-DESIGN.md`.
+- **`i18n.js`: il primo `ss:lang` arriva prima di `window.ssLang`.** Con l'inglese salvato, `setLanguage('en')` parte (ed emette `ss:lang`) prima della riga `window.ssLang = () => lang`: chi ridisegna su `ss:lang` leggendo `ssLang()` trova ancora l'italiano, e i testi creati dal JS restano in italiano finché non si tocca lo switch. TopFratmRanks lo aggira in `js/strings.js` leggendo la lingua da `event.detail.lang`. Correzione nel kit: definire `window.ssLang` e `window.ssSetLanguage` **prima** di `if (saved === 'en') setLanguage('en')`.
 - **Versione del kit e `grep -m1 "kit "`.** In TopFratmRanks con il kit 1.0 il comando di `THEME-ADOPTION.md` (punto 0) trovava il commento "not in the hub kit yet" delle aggiunte e sembrava una versione. Proposta: `grep -m1 "kit [0-9]" css/tokens.css`.
 
 ## Tema scuro (kit 1.1, adottato il 2026-10-18)
@@ -79,6 +82,8 @@ Contrasti delle coppie usate dalle aggiunte (WCAG 2.x):
 | `--ink-500` su `--paper` (hover dello swatch) | 5,52 | 4,71 | 3 |
 | `--ink-700` su `--paper` (scheda vuota con un file sopra) | 8,80 | 6,91 | 3 |
 | `--ink-500` su `--wall-top` / `--wall-bottom` (switch tema a riposo) | 4,71 / 3,94 | 5,36 / 6,18 | 3 |
+
+**Bug nel kit 1.1: `assets/scrollstudio-wordmark-light.svg` non si apre.** Il commento in testa contiene `--ink-700`, e in XML `--` dentro un commento è un errore fatale: il browser scarta l'immagine (`naturalWidth` 0) e in tema scuro si vede il logo rotto. Stesso file nell'hub in `design-kit/assets/` e in `assets/logos/`. In TopFratmRanks la copia in `assets/` è corretta (`ink-700 token` nel commento); la copia del kit in `designScroll/` è lasciata com'è finché non si corregge l'hub.
 
 Colori scritti a mano rimasti: ombre `rgb(var(--shadow-ink) / α)`; il ripiego `var(--c, var(--paper))` del pallino (il JS imposta sempre `--c`); nel JS solo contenuto (colori delle parole e dei numeri, canvas, nero dietro le miniature) e le bandiere.
 
@@ -157,6 +162,17 @@ Colori scritti a mano rimasti: ombre `rgb(var(--shadow-ink) / α)`; il ripiego `
 /* No speed control after it: the time stays next to Play, as in the specimen */
 .ss-timeline__bar > .ss-icon-btn + .ss-time:last-child {
   margin-left: 0;
+}
+
+/* N16 Wide screens: the kit's stage column takes all the wall left of the panel, so on a large
+   screen the 300px preview floats far from its controls and off the title's axis. Here the
+   stage column stops at the timeline's width and panel + stage stay one group, centred under
+   the title. The page stays as wide as before: the light behind the stage is not cut */
+@media (min-width: 861px) {
+  .ss-editor {
+    grid-template-columns: minmax(280px, var(--panel-w)) minmax(0, var(--stage-w));
+    justify-content: center;
+  }
 }
 
 /* App choice (asked by the user, 2026-10-18; not in the hub kit): every button except the
@@ -669,5 +685,6 @@ In `css/tokens.css`, in coda:
 
 :root {
   --panel-w: 340px; /* widest settings sheet: the max column of .ss-editor's panel in family.css; the landing uses the same sheet */
+  --stage-w: 560px; /* widest stage column on wide screens: the max-width of .ss-timeline in family.css */
 }
 ```

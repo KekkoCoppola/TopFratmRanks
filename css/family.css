@@ -1362,6 +1362,17 @@ h3 {
   margin-left: 0;
 }
 
+/* N16 Wide screens: the kit's stage column takes all the wall left of the panel, so on a large
+   screen the 300px preview floats far from its controls and off the title's axis. Here the
+   stage column stops at the timeline's width and panel + stage stay one group, centred under
+   the title. The page stays as wide as before: the light behind the stage is not cut */
+@media (min-width: 861px) {
+  .ss-editor {
+    grid-template-columns: minmax(280px, var(--panel-w)) minmax(0, var(--stage-w));
+    justify-content: center;
+  }
+}
+
 /* App choice (asked by the user, 2026-10-18; not in the hub kit): every button except the
    coral main action is ink with on-ink text, for contrast on paper. Same for the chosen
    segmented option. Hover goes one ink step lighter. Bare icon buttons stay bare */
