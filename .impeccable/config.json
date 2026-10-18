@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-10-18T15:19:55.643Z",
         "reason": "agent decided: the only infinite animation is N6 .ss-progress--indeterminate (ss-sweep in css/family.css), a loading bar shown only while a TikTok link imports in the editor; it stops under prefers-reduced-motion. No scrolling content."
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "editor.html"
+        ],
+        "createdAt": "2026-10-18T20:16:45.948Z",
+        "reason": "agent decided: same as index.html — the only infinite animation is N6 .ss-progress--indeterminate (ss-sweep), a loading bar shown only while a TikTok link imports; stops under prefers-reduced-motion. No scrolling content."
       }
     ]
   }
