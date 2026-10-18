@@ -6,9 +6,10 @@
   var canvas = document.getElementById('preview-canvas');
   var ctx = canvas.getContext('2d');
   var playBtn = document.getElementById('btn-play');
-  var progressBar = document.getElementById('progress-bar');
-  var progressFill = document.getElementById('progress-fill');
-  var progressThumb = document.getElementById('progress-thumb');
+  var playIcon = playBtn.querySelector('.play-icon');
+  var pauseIcon = playBtn.querySelector('.pause-icon');
+  var progressBar = document.getElementById('progress-bar');     // .ss-timeline__lanes: pointer target, holds --t
+  var progressScrub = document.getElementById('progress-scrub'); // .ss-scrub: role=slider, keyboard
   var timeDisplay = document.getElementById('time-display');
 
   var playing = false;
@@ -47,11 +48,27 @@
     return set;
   }
 
+  var barTime = 0; // last position shown on the bar (seconds), for keyboard seeking
+
   function updateBar(t, total) {
     var pct = total > 0 ? (t / total * 100) : 0;
-    progressFill.style.width = pct + '%';
-    progressThumb.style.left = pct + '%';
-    timeDisplay.textContent = fmt(t) + ' / ' + fmt(total);
+    barTime = t;
+    // the kit timeline draws the fill and the playhead from --t
+    progressBar.style.setProperty('--t', pct + '%');
+    timeDisplay.innerHTML = '<b>' + fmt(t) + '</b> / ' + fmt(total);
+    progressScrub.setAttribute('aria-valuemax', String(Math.round(total * 10) / 10));
+    progressScrub.setAttribute('aria-valuenow', String(Math.round(t * 10) / 10));
+    progressScrub.setAttribute('aria-valuetext', fmt(t) + ' / ' + fmt(total));
+  }
+
+  // Play button: icon and label follow the state (labels in both languages)
+  function setPlayIcon(isPlaying) {
+    // SVG elements have no .hidden property: toggle the attribute
+    playIcon.toggleAttribute('hidden', isPlaying);
+    pauseIcon.toggleAttribute('hidden', !isPlaying);
+    var label = TRV.t(isPlaying ? 'pause' : 'playPreview');
+    playBtn.setAttribute('aria-label', label);
+    playBtn.title = label;
   }
 
   // Idle: show the first frame of the first clip with ALL names revealed,
@@ -91,7 +108,7 @@
       } else {
         // reached the end
         playing = false;
-        playBtn.textContent = '▶';
+        setPlayIcon(false);
         drawPlaying();
         return;
       }
@@ -124,14 +141,14 @@
       seg.clip.video.play();
     }
     playing = true;
-    playBtn.textContent = '⏸';
+    setPlayIcon(true);
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(tick);
   }
 
   function pause() {
     playing = false;
-    playBtn.textContent = '▶';
+    setPlayIcon(false);
     pauseAll();
     cancelAnimationFrame(raf);
   }
@@ -140,7 +157,7 @@
     playing = false;
     started = false;
     segIndex = 0;
-    playBtn.textContent = '▶';
+    setPlayIcon(false);
     pauseAll();
     cancelAnimationFrame(raf);
   }
@@ -229,6 +246,22 @@
     scrubbing = false;
     progressBar.classList.remove('scrubbing');
   });
+
+  // Keyboard on the slider: ←/→ one second, Home/End start/end
+  progressScrub.addEventListener('keydown', function (e) {
+    var tl = getTimeline();
+    if (!tl.segs.length) return;
+    var t = barTime;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') t -= 1;
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') t += 1;
+    else if (e.key === 'Home') t = 0;
+    else if (e.key === 'End') t = tl.total;
+    else return;
+    e.preventDefault();
+    seek(Math.max(0, Math.min(t, tl.total)));
+  });
+
+  TRV.onLang(function () { setPlayIcon(playing); });
 
   // Redraw whenever the editor state changes (unless mid-playback: tick handles it).
   function redraw() {

@@ -15,14 +15,14 @@
   function resolveTikTok(url) {
     var api = 'https://tikwm.com/api/?hd=1&url=' + encodeURIComponent(url);
     return fetch(api).then(function (r) {
-      if (!r.ok) throw new Error('Download service returned HTTP ' + r.status + '.');
+      if (!r.ok) throw new Error(TRV.t('errHttpService', { s: r.status }));
       return r.json();
     }).then(function (j) {
       if (!j || j.code !== 0 || !j.data) {
-        throw new Error((j && j.msg) ? j.msg : 'Could not read this TikTok link.');
+        throw new Error((j && j.msg) ? j.msg : TRV.t('errReadTikTok'));
       }
       var play = j.data.hdplay || j.data.play || j.data.wmplay;
-      if (!play) throw new Error('No downloadable video found for this link.');
+      if (!play) throw new Error(TRV.t('errNoDownload'));
       // tikwm sometimes returns a relative path on its own domain
       if (play.charAt(0) === '/') play = 'https://tikwm.com' + play;
       return { mediaUrl: play, title: j.data.title || '' };
@@ -33,18 +33,18 @@
   function importFromLink(url, onStatus) {
     onStatus = onStatus || function () {};
     url = (url || '').trim();
-    if (!url) return Promise.reject(new Error('Paste a link first.'));
-    if (!/^https?:\/\//i.test(url)) return Promise.reject(new Error('That does not look like a valid link.'));
-    if (!isTikTok(url)) return Promise.reject(new Error('Only TikTok links are supported for now.'));
+    if (!url) return Promise.reject(new Error(TRV.t('errPasteFirst')));
+    if (!/^https?:\/\//i.test(url)) return Promise.reject(new Error(TRV.t('errBadLink')));
+    if (!isTikTok(url)) return Promise.reject(new Error(TRV.t('errOnlyTikTok')));
 
-    onStatus('Resolving link…');
+    onStatus(TRV.t('resolvingLink'));
     return resolveTikTok(url).then(function (info) {
-      onStatus('Downloading (no watermark)…');
+      onStatus(TRV.t('downloading'));
       return fetch(info.mediaUrl).then(function (r) {
-        if (!r.ok) throw new Error('Failed to download the video (HTTP ' + r.status + ').');
+        if (!r.ok) throw new Error(TRV.t('errDownloadHttp', { s: r.status }));
         return r.blob();
       }).then(function (blob) {
-        if (!blob.size) throw new Error('Downloaded an empty file — try again.');
+        if (!blob.size) throw new Error(TRV.t('errEmptyFile'));
         var type = blob.type && /video\//.test(blob.type) ? blob.type : 'video/mp4';
         var name = 'tiktok-' + Date.now() + '.mp4';
         return new File([blob], name, { type: type });

@@ -3,20 +3,35 @@
   'use strict';
 
   var state = TRV.state;
+  var t = TRV.t;
+
+  // Kit icons: 12-unit grid, 1px stroke, currentColor (see css/family.css .ss-icon)
+  var ICONS = {
+    chevron: '<svg class="ss-icon ss-clip__rank-chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>',
+    play: '<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z"/></svg>',
+    handle: '<svg class="ss-icon ss-clip__handle" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3h0M7.5 3h0M4.5 6h0M7.5 6h0M4.5 9h0M7.5 9h0" stroke-width="1.6"/></svg>',
+    download: '<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2v6M3.5 5.5 6 8l2.5-2.5M2 10h8"/></svg>',
+    upload: '<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 8V2M3.5 4.5 6 2l2.5 2.5M2 10h8"/></svg>',
+    trash: '<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 3.5h7M4.75 3.5V2h2.5v1.5M3.5 3.5l.5 6.5h4l.5-6.5"/></svg>',
+    close: '<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9"/></svg>'
+  };
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
 
   /* ---------- header ---------- */
   function refreshRankHeader() {
-    document.getElementById('rank-display').textContent = 'Ranking: Top ' + state.rankCount;
-    document.title = 'TopRankVids — Top ' + state.rankCount + ' Editor';
+    document.getElementById('rank-display').textContent = t('rankDisplay', { n: state.rankCount });
+    document.title = t('editorTitle', { n: state.rankCount });
   }
   refreshRankHeader();
+  TRV.onLang(refreshRankHeader);
 
-  /* ---------- collapsible sections ---------- */
-  document.querySelectorAll('.section-header').forEach(function (header) {
-    header.addEventListener('click', function () {
-      header.parentElement.classList.toggle('collapsed');
-    });
-  });
+  // Sections are <details>: the browser opens and closes them, no JS needed.
 
   /* ---------- title controls ---------- */
   var titleInput = document.getElementById('title-input');
@@ -39,19 +54,14 @@
     wordsContainer.innerHTML = '';
     var words = TRV.titleWords();
     if (!words.length) {
-      var hint = document.createElement('span');
-      hint.className = 'words-hint';
-      hint.textContent = 'Type a title above to color each word';
-      wordsContainer.appendChild(hint);
+      wordsContainer.appendChild(el('span', 'ss-hint', t('wordsHint')));
       return;
     }
     words.forEach(function (word, i) {
-      var chip = document.createElement('button');
+      var chip = el('button', 'ss-btn ss-btn--sm ss-word', word);
       chip.type = 'button';
-      chip.className = 'word-chip';
-      chip.textContent = word;
-      chip.style.color = state.title.wordColors[i] || '#FFFFFF';
-      chip.title = 'Change color of "' + word + '"';
+      chip.style.setProperty('--c', state.title.wordColors[i] || '#FFFFFF');
+      chip.title = t('wordColorTitle', { w: word });
       chip.addEventListener('click', function () {
         pickerTarget = { kind: 'word', index: i };
         hiddenPicker.value = toHex(state.title.wordColors[i] || '#FFFFFF');
@@ -110,21 +120,20 @@
   var italicBtn = document.getElementById('btn-italic');
   boldBtn.addEventListener('click', function () {
     state.title.bold = !state.title.bold;
-    boldBtn.classList.toggle('active', state.title.bold);
+    boldBtn.setAttribute('aria-pressed', String(state.title.bold));
     TRV.emitChange();
   });
   italicBtn.addEventListener('click', function () {
     state.title.italic = !state.title.italic;
-    italicBtn.classList.toggle('active', state.title.italic);
+    italicBtn.setAttribute('aria-pressed', String(state.title.italic));
     TRV.emitChange();
   });
 
-  var strokeToggle = document.getElementById('stroke-toggle');
+  var strokeToggle = document.getElementById('stroke-toggle'); // checkbox (.ss-switch)
   var strokeWidth = document.getElementById('stroke-width');
   var strokeColor = document.getElementById('stroke-color');
-  strokeToggle.addEventListener('click', function () {
-    state.title.stroke.on = !state.title.stroke.on;
-    strokeToggle.classList.toggle('active', state.title.stroke.on);
+  strokeToggle.addEventListener('change', function () {
+    state.title.stroke.on = strokeToggle.checked;
     TRV.emitChange();
   });
   strokeWidth.addEventListener('input', function () {
@@ -184,19 +193,17 @@
     rankCustomColors.innerHTML = '';
     for (var i = 0; i < state.rankCount; i++) {
       (function (idx) {
-        var item = document.createElement('div');
-        item.className = 'rank-color-item';
-        var input = document.createElement('input');
+        var item = el('label', 'ss-swatch-list__item');
+        var input = el('input', 'ss-swatch');
         input.type = 'color';
+        input.setAttribute('aria-label', t('colorN', { n: idx + 1 }));
         input.value = toHex(state.rankCustomColors[idx]);
         input.addEventListener('input', function () {
           state.rankCustomColors[idx] = input.value;
           TRV.emitChange();
         });
-        var label = document.createElement('span');
-        label.textContent = '#' + (idx + 1);
         item.appendChild(input);
-        item.appendChild(label);
+        item.appendChild(el('span', null, '#' + (idx + 1)));
         rankCustomColors.appendChild(item);
       })(i);
     }
@@ -222,11 +229,13 @@
     }
   }
 
+  // One card per rank (.ss-clip.ss-clip--slot): big rank number, thumb, name + duration,
+  // then a second row with the label field and the remove icons. Empty ranks get the
+  // link import row and an "Upload file" button instead (files can be dropped on the card).
   function buildSlot(rankIndex, playPos) {
     var clip = state.clips[rankIndex];
-    var slot = document.createElement('div');
-    slot.className = 'clip-slot';
-    if (rankIndex === activeClipRank) slot.classList.add('clip-active');
+    var slot = el('li', 'ss-clip ss-clip--slot' + (clip ? '' : ' ss-clip--empty'));
+    if (rankIndex === activeClipRank) slot.classList.add('is-active');
 
     // Loaded cards drag to change the PLAY order (rank numbers stay put).
     if (clip) {
@@ -234,30 +243,30 @@
 
       slot.addEventListener('dragstart', function (e) {
         dragFromPos = playPos;
-        slot.classList.add('dragging');
+        slot.classList.add('is-dragging');
         e.dataTransfer.effectAllowed = 'move';
         // Set minimal drag data so the browser allows dragging
         e.dataTransfer.setData('text/plain', '' + playPos);
       });
       slot.addEventListener('dragend', function () {
-        slot.classList.remove('dragging');
+        slot.classList.remove('is-dragging');
         dragFromPos = -1;
-        slotsContainer.querySelectorAll('.drag-over').forEach(function (el) {
-          el.classList.remove('drag-over');
+        slotsContainer.querySelectorAll('.is-drop-target').forEach(function (node) {
+          node.classList.remove('is-drop-target');
         });
       });
       slot.addEventListener('dragover', function (e) {
         if (dragFromPos < 0 || dragFromPos === playPos) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        slot.classList.add('drag-over');
+        slot.classList.add('is-drop-target');
       });
       slot.addEventListener('dragleave', function () {
-        slot.classList.remove('drag-over');
+        slot.classList.remove('is-drop-target');
       });
       slot.addEventListener('drop', function (e) {
         e.preventDefault();
-        slot.classList.remove('drag-over');
+        slot.classList.remove('is-drop-target');
         if (dragFromPos < 0 || dragFromPos === playPos) return;
         TRV.movePlayback(dragFromPos, playPos);
         dragFromPos = -1;
@@ -266,17 +275,18 @@
       });
     }
 
-    var header = document.createElement('div');
-    header.className = 'clip-slot-header';
+    // Big rank number. On loaded cards it is also the rank menu: a native <select>
+    // laid over the number (pick 1..N, swaps with the occupant).
+    var rank = el(clip ? 'label' : 'span', 'ss-clip__rank');
+    rank.appendChild(el('span', 'ss-clip__rank-num', String(rankIndex + 1)));
+    rank.insertAdjacentHTML('beforeend', ICONS.chevron);
     if (clip) {
-      // Rank is chosen from a dropdown: pick 1..N, swaps with the occupant.
-      var rankSelect = document.createElement('select');
-      rankSelect.className = 'rank-select';
-      rankSelect.title = 'Change the rank number of this clip';
+      var rankSelect = el('select', 'rank-select');
+      rankSelect.title = t('rankSelectTitle');
+      rankSelect.setAttribute('aria-label', t('rankSelectTitle'));
       for (var r = 0; r < state.rankCount; r++) {
-        var opt = document.createElement('option');
+        var opt = el('option', null, t('rankOption', { n: r + 1 }));
         opt.value = r;
-        opt.textContent = 'Rank #' + (r + 1);
         rankSelect.appendChild(opt);
       }
       rankSelect.value = rankIndex;
@@ -289,27 +299,59 @@
         buildSlots();
         TRV.emitChange();
       });
-      header.appendChild(rankSelect);
-    } else {
-      var title = document.createElement('span');
-      title.className = 'slot-title';
-      title.innerHTML = 'Rank <span class="slot-num">#' + (rankIndex + 1) + '</span>';
-      header.appendChild(title);
+      rank.appendChild(rankSelect);
     }
-    // Play-order badge: rank number and play position are two different things.
-    if (clip && playPos !== -1) {
-      var badge = document.createElement('span');
-      badge.className = 'play-order-badge';
-      badge.title = 'This clip plays ' + ordinal(playPos + 1) + ' in the video';
-      badge.textContent = '▶ ' + ordinal(playPos + 1);
-      header.appendChild(badge);
-    }
+    slot.appendChild(rank);
+
+    var body = el('div', 'ss-clip__body');
+
     if (clip) {
-      var removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'btn-icon';
-      removeBtn.textContent = '🗑';
-      removeBtn.title = 'Remove clip';
+      // Thumb + name/duration: click -> preview that clip
+      var thumb = el('canvas', 'ss-clip__thumb');
+      thumb.width = 54;
+      thumb.height = 96;
+      drawThumb(thumb, clip);
+
+      var meta = el('span', 'ss-clip__meta');
+      meta.appendChild(el('span', 'ss-clip__name', clip.file.name));
+      var dur = el('span', 'ss-clip__dur', TRV.seconds(clip.duration));
+      // Play-order badge: rank number and play position are two different things.
+      if (playPos !== -1) {
+        var badge = el('span', 'ss-badge');
+        badge.title = t('playsNth', { nth: TRV.ordinal(playPos + 1) });
+        badge.innerHTML = ICONS.play;
+        badge.appendChild(el('span', null, TRV.ordinal(playPos + 1)));
+        dur.appendChild(badge);
+      }
+      meta.appendChild(dur);
+
+      function previewThisClip() {
+        activeClipRank = rankIndex;
+        buildSlots();
+        if (TRV.preview && TRV.preview.seekToRank) {
+          TRV.preview.seekToRank(rankIndex);
+        }
+      }
+      thumb.addEventListener('click', previewThisClip);
+      meta.addEventListener('click', previewThisClip);
+
+      slot.appendChild(thumb);
+      slot.appendChild(meta);
+      slot.insertAdjacentHTML('beforeend', ICONS.handle);
+
+      var nameInput = el('input', 'ss-input');
+      nameInput.type = 'text';
+      nameInput.placeholder = t('labelPlaceholder', { n: rankIndex + 1 });
+      nameInput.value = clip.name;
+      nameInput.addEventListener('click', function (e) { e.stopPropagation(); });
+      nameInput.addEventListener('input', function () {
+        clip.name = nameInput.value;
+        TRV.emitChange();
+      });
+      // Label + the two remove buttons (bare icons, the full wording in the tooltip)
+      var labelRow = el('div', 'ss-clip__label-row');
+      labelRow.appendChild(nameInput);
+      var removeBtn = iconButton(ICONS.trash, t('removeClip'), 'ss-clip__remove-clip');
       removeBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         TRV.removeClip(rankIndex);
@@ -317,128 +359,103 @@
         buildSlots();
         TRV.emitChange();
       });
-      header.appendChild(removeBtn);
-    }
-    if (state.rankCount > 1) {
-      var removeRankBtn = document.createElement('button');
-      removeRankBtn.type = 'button';
-      removeRankBtn.className = 'btn-icon';
-      removeRankBtn.textContent = '✕';
-      removeRankBtn.title = 'Remove this rank entirely';
-      removeRankBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        removeRankUI(rankIndex);
-      });
-      header.appendChild(removeRankBtn);
-    }
-    slot.appendChild(header);
-
-    if (!clip) {
-      if (slotLoading[rankIndex]) {
-        // Importing from a link — show a busy state instead of the drop zone.
-        var busy = document.createElement('div');
-        busy.className = 'drop-zone loading';
-        busy.innerHTML = '<span class="spinner"></span>' +
-          '<strong>' + escapeHtml(slotLoading[rankIndex]) + '</strong><br>' +
-          '<span class="dz-sub">Importing clip for rank #' + (rankIndex + 1) + '</span>';
-        slot.appendChild(busy);
-        slotsContainer.appendChild(slot);
-        return;
-      }
-
-      // --- Link import row ---
-      var linkRow = document.createElement('div');
-      linkRow.className = 'link-row';
-      var linkInput = document.createElement('input');
-      linkInput.type = 'text';
-      linkInput.className = 'input link-input';
-      linkInput.placeholder = 'Paste a TikTok link…';
-      var linkBtn = document.createElement('button');
-      linkBtn.type = 'button';
-      linkBtn.className = 'btn-link';
-      linkBtn.textContent = '⬇ Import';
-      function submitLink() { handleLink(rankIndex, linkInput.value); }
-      linkBtn.addEventListener('click', submitLink);
-      linkInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); submitLink(); }
-      });
-      linkRow.appendChild(linkInput);
-      linkRow.appendChild(linkBtn);
-      slot.appendChild(linkRow);
-
-      var orSep = document.createElement('div');
-      orSep.className = 'or-sep';
-      orSep.textContent = 'or';
-      slot.appendChild(orSep);
-
-      var dz = document.createElement('div');
-      dz.className = 'drop-zone';
-      dz.innerHTML = '<span class="dz-icon">📥</span>' +
-        '<strong>Drop a clip here</strong> or click to browse<br>MP4 / WebM, the clip for rank #' + (rankIndex + 1) +
-        (slotErrors[rankIndex] ? '<span class="dz-error">⚠ ' + escapeHtml(slotErrors[rankIndex]) + '</span>' : '');
-      dz.addEventListener('click', function () {
-        fileTargetRank = rankIndex;
-        hiddenFileInput.value = '';
-        hiddenFileInput.click();
-      });
-      dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('dragover'); });
-      dz.addEventListener('dragleave', function () { dz.classList.remove('dragover'); });
-      dz.addEventListener('drop', function (e) {
-        e.preventDefault();
-        dz.classList.remove('dragover');
-        // Only handle file drops, not clip reorder drops
-        var file = e.dataTransfer.files && e.dataTransfer.files[0];
-        if (file) handleFile(rankIndex, file);
-      });
-      slot.appendChild(dz);
+      labelRow.appendChild(removeBtn);
+      if (state.rankCount > 1) labelRow.appendChild(removeRankButton(rankIndex));
+      body.appendChild(labelRow);
     } else {
-      var loaded = document.createElement('div');
-      loaded.className = 'clip-loaded';
+      // Empty rank, compact: link import + "Upload file". A file can also be dropped
+      // anywhere on the card; the accepted formats are in the button's tooltip.
+      if (slotLoading[rankIndex]) {
+        // Importing from a link — status + indeterminate progress instead of the controls.
+        var status = el('span', 'ss-clip__status', slotLoading[rankIndex]);
+        status.setAttribute('role', 'status');
+        slot.appendChild(status);
+        body.insertAdjacentHTML('beforeend',
+          '<div class="ss-progress ss-progress--indeterminate"><div class="ss-progress__track"><div class="ss-progress__fill"></div></div></div>');
+      } else {
+        // --- Link import row ---
+        var linkRow = el('div', 'ss-clip__link');
+        var linkInput = el('input', 'ss-input');
+        linkInput.type = 'text';
+        linkInput.placeholder = t('pasteLink');
+        linkInput.setAttribute('aria-label', t('pasteLink'));
+        var linkBtn = el('button', 'ss-btn ss-btn--sm');
+        linkBtn.type = 'button';
+        linkBtn.innerHTML = ICONS.download;
+        linkBtn.appendChild(el('span', null, t('importBtn')));
+        function submitLink() { handleLink(rankIndex, linkInput.value); }
+        linkBtn.addEventListener('click', submitLink);
+        linkInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); submitLink(); }
+        });
+        linkRow.appendChild(linkInput);
+        slot.appendChild(linkRow);
 
-      // Click on clip -> preview that clip
-      loaded.addEventListener('click', function () {
-        activeClipRank = rankIndex;
-        buildSlots();
-        if (TRV.preview && TRV.preview.seekToRank) {
-          TRV.preview.seekToRank(rankIndex);
+        // --- Row 2: Import (the link) and Upload a file ---
+        var buttons = el('div', 'ss-clip__buttons');
+        buttons.appendChild(linkBtn);
+        var upload = el('button', 'ss-btn ss-btn--sm ss-clip__upload');
+        upload.type = 'button';
+        upload.title = t('dropHint', { n: rankIndex + 1 });
+        upload.innerHTML = ICONS.upload;
+        upload.appendChild(el('span', null, t('uploadFile')));
+        upload.addEventListener('click', function () {
+          fileTargetRank = rankIndex;
+          hiddenFileInput.value = '';
+          hiddenFileInput.click();
+        });
+        buttons.appendChild(upload);
+        body.appendChild(buttons);
+
+        if (slotErrors[rankIndex]) {
+          var error = el('p', 'ss-note ss-note--error', slotErrors[rankIndex]);
+          error.setAttribute('role', 'alert');
+          body.appendChild(error);
         }
-      });
 
-      var thumb = document.createElement('canvas');
-      thumb.className = 'clip-thumb';
-      thumb.width = 64;
-      thumb.height = 100;
-      drawThumb(thumb, clip);
-
-      var info = document.createElement('div');
-      info.className = 'clip-info';
-      var fname = document.createElement('div');
-      fname.className = 'clip-filename';
-      fname.textContent = clip.file.name + ' · ';
-      var dur = document.createElement('span');
-      dur.className = 'clip-duration';
-      dur.textContent = clip.duration.toFixed(1) + 's';
-      fname.appendChild(dur);
-
-      var nameInput = document.createElement('input');
-      nameInput.type = 'text';
-      nameInput.className = 'input clip-name-input';
-      nameInput.placeholder = 'Label shown next to #' + (rankIndex + 1) + ' (e.g. "Wow")';
-      nameInput.value = clip.name;
-      nameInput.addEventListener('click', function (e) { e.stopPropagation(); });
-      nameInput.addEventListener('input', function () {
-        clip.name = nameInput.value;
-        TRV.emitChange();
-      });
-
-      info.appendChild(fname);
-      info.appendChild(nameInput);
-      loaded.appendChild(thumb);
-      loaded.appendChild(info);
-      slot.appendChild(loaded);
+        // Files dropped anywhere on the empty card (clip reorder drags are not files)
+        function hasFiles(e) {
+          return !!e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') !== -1;
+        }
+        slot.addEventListener('dragover', function (e) {
+          if (!hasFiles(e)) return;
+          e.preventDefault();
+          slot.classList.add('is-over');
+        });
+        slot.addEventListener('dragleave', function (e) {
+          if (!slot.contains(e.relatedTarget)) slot.classList.remove('is-over');
+        });
+        slot.addEventListener('drop', function (e) {
+          e.preventDefault();
+          slot.classList.remove('is-over');
+          var file = e.dataTransfer.files && e.dataTransfer.files[0];
+          if (file) handleFile(rankIndex, file);
+        });
+      }
+      if (state.rankCount > 1) slot.appendChild(removeRankButton(rankIndex));
     }
 
+    slot.appendChild(body);
     slotsContainer.appendChild(slot);
+  }
+
+  // Small bare icon button with its label as tooltip and accessible name
+  function iconButton(icon, label, className) {
+    var btn = el('button', 'ss-icon-btn ss-icon-btn--bare ' + className);
+    btn.type = 'button';
+    btn.title = label;
+    btn.setAttribute('aria-label', label);
+    btn.innerHTML = icon;
+    return btn;
+  }
+
+  function removeRankButton(rankIndex) {
+    var btn = iconButton(ICONS.close, t('removeRankTitle'), 'ss-clip__remove-rank');
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      removeRankUI(rankIndex);
+    });
+    return btn;
   }
 
   function drawThumb(thumbCanvas, clip) {
@@ -463,16 +480,10 @@
     }
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
   function handleFile(rankIndex, file) {
     delete slotErrors[rankIndex];
     if (!/^video\//.test(file.type) && !/\.(mp4|webm|mov|m4v)$/i.test(file.name)) {
-      slotErrors[rankIndex] = 'Not a video file.';
+      slotErrors[rankIndex] = t('errNotVideo');
       buildSlots();
       return;
     }
@@ -480,7 +491,7 @@
       buildSlots();
       TRV.emitChange();
     }).catch(function (err) {
-      slotErrors[rankIndex] = err.message || 'Cannot load this clip.';
+      slotErrors[rankIndex] = err.message || t('errCannotLoad');
       buildSlots();
     });
   }
@@ -488,7 +499,7 @@
   // Import a clip from a pasted link (TikTok): download no-watermark, then reuse handleFile.
   function handleLink(rankIndex, url) {
     delete slotErrors[rankIndex];
-    slotLoading[rankIndex] = 'Resolving link…';
+    slotLoading[rankIndex] = t('resolvingLink');
     buildSlots();
     TRV.importFromLink(url, function (status) {
       slotLoading[rankIndex] = status;
@@ -498,7 +509,7 @@
       handleFile(rankIndex, file);
     }).catch(function (err) {
       delete slotLoading[rankIndex];
-      slotErrors[rankIndex] = err.message || 'Could not import from that link.';
+      slotErrors[rankIndex] = err.message || t('errImportLink');
       buildSlots();
     });
   }
@@ -513,7 +524,7 @@
 
   function updateAddRankButton() {
     addRankBtn.disabled = state.rankCount >= TRV.MAX_RANKS;
-    addRankBtn.title = addRankBtn.disabled ? 'Maximum of ' + TRV.MAX_RANKS + ' ranks' : '';
+    addRankBtn.title = addRankBtn.disabled ? t('maxRanks', { n: TRV.MAX_RANKS }) : '';
   }
 
   function afterRankStructureChange() {
@@ -534,29 +545,25 @@
   function removeRankUI(rankIndex) {
     if (state.rankCount <= 1) return;
     var clip = state.clips[rankIndex];
-    if (clip && !window.confirm('Remove rank #' + (rankIndex + 1) + ' and its loaded clip? This cannot be undone.')) {
-      return;
+    function doRemove() {
+      if (activeClipRank === rankIndex) activeClipRank = -1;
+      else if (activeClipRank > rankIndex) activeClipRank--;
+      if (TRV.removeRank(rankIndex)) afterRankStructureChange();
     }
-    if (activeClipRank === rankIndex) activeClipRank = -1;
-    else if (activeClipRank > rankIndex) activeClipRank--;
-    if (TRV.removeRank(rankIndex)) afterRankStructureChange();
+    if (!clip) { doRemove(); return; }
+    // A rank with a loaded clip asks first, in a kit modal (was window.confirm)
+    TRV.confirm({
+      title: t('confirmRemoveRankTitle', { n: rankIndex + 1 }),
+      body: t('confirmRemoveRankBody'),
+      ok: t('remove'),
+      cancel: t('cancel')
+    }).then(function (ok) { if (ok) doRemove(); });
   }
 
   /* ---------- play order: shuffle + reset ---------- */
-  function ordinal(n) {
-    var mod100 = n % 100;
-    if (mod100 >= 11 && mod100 <= 13) return n + 'th';
-    switch (n % 10) {
-      case 1: return n + 'st';
-      case 2: return n + 'nd';
-      case 3: return n + 'rd';
-      default: return n + 'th';
-    }
-  }
-
   var shuffleBtn = document.getElementById('btn-shuffle');
   shuffleBtn.addEventListener('click', function (e) {
-    e.stopPropagation(); // don't toggle the collapsible section
+    e.stopPropagation();
     if (TRV.loadedClipCount() < 2) return;
     TRV.shufflePlaybackOrder();
     buildSlots(); // refresh the play-order badges
@@ -573,44 +580,61 @@
 
   /* ---------- export button state ---------- */
   var exportBtn = document.getElementById('btn-export');
+  var exportBtnLabel = document.getElementById('btn-export-label');
   var exportProgress = document.getElementById('export-progress');
   var exportFill = document.getElementById('export-progress-fill');
+  var exportValue = document.getElementById('export-progress-value');
   var exportStatus = document.getElementById('export-status');
   var exporting = false;
+  var finalStatus = null; // { key, params, error }: the done/failed line, re-rendered on language change
 
   function updateExportButton() {
     var loadedCount = TRV.loadedClipCount();
     var allLoaded = loadedCount === state.rankCount;
     var canExport = loadedCount >= 1;
     exportBtn.disabled = exporting || !canExport;
-    exportBtn.textContent = exporting ? '⏳ Generating…'
-      : allLoaded ? '🚀 Generate Video Ranking'
-      : '🚀 Generate (' + loadedCount + '/' + state.rankCount + ' clips loaded)';
+    exportBtnLabel.textContent = exporting ? t('generating')
+      : allLoaded ? t('generate')
+      : t('generatePartial', { l: loadedCount, n: state.rankCount });
+  }
+
+  function setProgress(pct) {
+    var value = Math.round(pct * 100) + '%';
+    exportFill.style.width = value;
+    exportValue.textContent = value;
+  }
+
+  function setStatus(text, isError) {
+    exportStatus.textContent = text;
+    exportStatus.classList.toggle('ss-note--error', !!isError);
   }
 
   // Shared by the Generate button and the Publish button (which generates first
   // if there's no video yet). Rejects if a generation is already running.
   function runGenerate() {
-    if (exporting) return Promise.reject(new Error('A generation is already in progress.'));
+    if (exporting) return Promise.reject(new Error(t('errBusy')));
     exporting = true;
+    finalStatus = null;
     if (TRV.preview.isPlaying()) TRV.preview.stop();
     updateExportButton();
     exportProgress.classList.add('visible');
-    exportStatus.classList.remove('error');
+    setProgress(0);
+    setStatus(t('preparing'), false);
 
     return TRV.exportVideo(function (p) {
-      exportFill.style.width = Math.round((p.pct || 0) * 100) + '%';
-      exportStatus.textContent = p.stage || '';
+      setProgress(p.pct || 0);
+      setStatus(p.stage || '', false);
     }).then(function (result) {
-      exportFill.style.width = '100%';
-      exportStatus.textContent = '✅ Done! Downloaded ' + result.filename;
+      setProgress(1);
+      finalStatus = { key: 'exportDone', params: { f: result.filename }, error: false };
+      setStatus(t(finalStatus.key, finalStatus.params), false);
       exporting = false;
       updateExportButton();
       return result;
     }, function (err) {
       console.error(err);
-      exportStatus.classList.add('error');
-      exportStatus.textContent = '⚠ Export failed: ' + (err.message || err);
+      finalStatus = { key: 'exportFailed', params: { m: err.message || err }, error: true };
+      setStatus(t(finalStatus.key, finalStatus.params), true);
       exporting = false;
       updateExportButton();
       throw err;
@@ -627,7 +651,18 @@
 
   TRV.onChange(updateExportButton);
 
+  /* ---------- language: re-render everything built in JS ---------- */
+  TRV.onLang(function () {
+    rebuildWordChips();
+    if (state.rankColorMode === 'custom') rebuildRankCustomColors();
+    buildSlots();
+    updateExportButton();
+    updateAddRankButton();
+    if (finalStatus) setStatus(t(finalStatus.key, finalStatus.params), finalStatus.error);
+  });
+
   /* ---------- boot ---------- */
+  rebuildWordChips();
   buildSlots();
   updateExportButton();
   updateAddRankButton();

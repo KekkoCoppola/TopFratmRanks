@@ -13,6 +13,7 @@
   var ytDesc = $('yt-desc');
   var ytPrivacy = $('yt-privacy');
   var publishBtn = $('btn-publish');
+  var publishBtnLabel = $('btn-publish-label');
 
   var modal = $('publish-modal');
   var steps = {
@@ -53,19 +54,32 @@
   }
 
   /* ---------- account ---------- */
+  var ICON_CLOSE = '<svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9"/></svg>';
+  var connecting = false;
+
   function renderAccount() {
     accountBox.innerHTML = '';
     var ch = TRV.youtube.getChannel();
     if (ch) {
       var wrap = document.createElement('div');
-      wrap.className = 'yt-connected';
-      wrap.innerHTML = (ch.thumb ? '<img class="yt-avatar" src="' + ch.thumb + '" alt="">' : '') +
-        '<span class="yt-name">' + escapeHtml(ch.title) + '</span>';
+      wrap.className = 'ss-account';
+      if (ch.thumb) {
+        var avatar = document.createElement('img');
+        avatar.className = 'ss-account__avatar';
+        avatar.src = ch.thumb;
+        avatar.alt = '';
+        wrap.appendChild(avatar);
+      }
+      var name = document.createElement('span');
+      name.className = 'ss-account__name';
+      name.textContent = ch.title;
+      wrap.appendChild(name);
       var out = document.createElement('button');
       out.type = 'button';
-      out.className = 'btn-icon';
-      out.title = 'Disconnect';
-      out.textContent = '✕';
+      out.className = 'ss-icon-btn ss-icon-btn--bare';
+      out.title = TRV.t('disconnect');
+      out.setAttribute('aria-label', TRV.t('disconnect'));
+      out.innerHTML = ICON_CLOSE;
       out.addEventListener('click', function () {
         TRV.youtube.disconnect();
         renderAccount();
@@ -75,37 +89,48 @@
     } else {
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'btn-connect';
-      btn.textContent = 'Connect YouTube';
+      btn.className = 'ss-btn ss-btn--sm yt-connect';
+      btn.textContent = TRV.t(connecting ? 'connecting' : 'connectYouTube');
+      btn.disabled = connecting;
       btn.addEventListener('click', doConnect);
       accountBox.appendChild(btn);
     }
   }
 
+  // Sign-in failures are shown as an error note in the panel (and in the publish
+  // modal when the sign-in started there), instead of a native alert.
+  function showSignInError(message) {
+    ['yt-error', 'ps-error'].forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      el.textContent = message ? TRV.t('signInFailed', { m: message }) : '';
+      el.hidden = !message;
+    });
+  }
+
   function doConnect() {
-    var btn = accountBox.querySelector('.btn-connect');
-    if (btn) { btn.disabled = true; btn.textContent = 'Connecting…'; }
+    connecting = true;
+    showSignInError(null);
+    var btn = accountBox.querySelector('.yt-connect');
+    if (btn) { btn.disabled = true; btn.textContent = TRV.t('connecting'); }
     return TRV.youtube.connect(true).then(function () {
+      connecting = false;
       renderAccount();
       refreshSummary();
     }).catch(function (err) {
+      connecting = false;
       renderAccount();
-      alert('YouTube sign-in failed: ' + err.message);
+      showSignInError(err.message);
     });
   }
 
   if (connectBtn) connectBtn.addEventListener('click', doConnect);
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
   /* ---------- setup wizard ---------- */
   var setupModal = $('setup-modal');
   var setupInput = $('setup-client-id');
   var setupError = $('setup-error');
+  var copyBtn = $('setup-copy-origin');
 
   function openSetup() {
     // Only a real web origin can be authorized on Google's side.
@@ -114,10 +139,13 @@
     setupInput.value = TRV.youtube.getClientId();
     setupError.style.display = 'none';
     setupModal.style.display = '';
-    setupInput.focus();
+    TRV.modal.open(setupModal, { onEscape: closeSetup, initialFocus: setupInput });
   }
 
-  function closeSetup() { setupModal.style.display = 'none'; }
+  function closeSetup() {
+    setupModal.style.display = 'none';
+    TRV.modal.close(setupModal);
+  }
 
   $('btn-setup-open').addEventListener('click', openSetup);
   $('btn-setup-edit').addEventListener('click', openSetup);
@@ -125,12 +153,20 @@
   $('setup-cancel').addEventListener('click', closeSetup);
   setupModal.addEventListener('click', function (e) { if (e.target === setupModal) closeSetup(); });
 
-  $('setup-copy-origin').addEventListener('click', function () {
+  // Copy button: the copy icon turns into a check for a moment (label follows)
+  function setCopied(done) {
+    copyBtn.querySelector('.copy-icon').toggleAttribute('hidden', done);
+    copyBtn.querySelector('.check-icon').toggleAttribute('hidden', !done);
+    var label = TRV.t(done ? 'copied' : 'copy');
+    copyBtn.setAttribute('aria-label', label);
+    copyBtn.title = label;
+  }
+
+  copyBtn.addEventListener('click', function () {
     var text = $('setup-origin').textContent;
-    var btn = $('setup-copy-origin');
     function flash() {
-      btn.textContent = '✓';
-      setTimeout(function () { btn.textContent = '📋'; }, 1200);
+      setCopied(true);
+      setTimeout(function () { setCopied(false); }, 1200);
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(flash, flash);
@@ -148,7 +184,7 @@
   $('setup-save').addEventListener('click', function () {
     var id = setupInput.value.trim();
     if (!/^[\w-]+(\.[\w-]+)*\.apps\.googleusercontent\.com$/.test(id)) {
-      setupError.textContent = 'That does not look like a Client ID — it must end with ".apps.googleusercontent.com".';
+      setupError.textContent = TRV.t('errClientId');
       setupError.style.display = '';
       return;
     }
@@ -170,49 +206,63 @@
     var canGenerate = TRV.loadedClipCount() >= 1;
     var busy = uploading || generatingForPublish || (TRV.isGenerating && TRV.isGenerating());
     publishBtn.disabled = busy || !confOk || (!hasVideo && !canGenerate);
-    publishBtn.textContent = generatingForPublish ? '⏳ Generating…' : '📤 Publish';
-    publishBtn.title = !confOk ? 'Set up publishing first (📤 Publishing section in the sidebar)'
-      : (!hasVideo && !canGenerate) ? 'Load at least one clip first'
-      : hasVideo ? 'Publish the generated video to YouTube'
-      : 'Generates the video, then publishes it to YouTube';
+    publishBtnLabel.textContent = TRV.t(generatingForPublish ? 'generating' : 'publish');
+    publishBtn.title = !confOk ? TRV.t('publishTitleSetup')
+      : (!hasVideo && !canGenerate) ? TRV.t('publishTitleNoClip')
+      : hasVideo ? TRV.t('publishTitleReady')
+      : TRV.t('publishTitleGenerate');
   }
 
   TRV.onChange(updatePublishButton);
+
+  // Language switch: re-render what this file builds in JS
+  TRV.onLang(function () {
+    renderAccount();
+    updatePublishButton();
+  });
   updatePublishButton();
 
   /* ---------- modal helpers ---------- */
+  var dialog = modal.querySelector('.ss-modal');
+  var modalOpen = false;
+
   function showStep(name) {
     Object.keys(steps).forEach(function (k) {
       steps[k].style.display = k === name ? '' : 'none';
     });
+    var heading = steps[name].querySelector('.ss-modal__title');
+    if (heading) dialog.setAttribute('aria-labelledby', heading.id);
+    if (modalOpen) TRV.modal.focusIn(steps[name]);
   }
 
   function openModal() {
     modal.style.display = '';
+    showSignInError(null);
     refreshSummary();
     showStep('summary');
+    modalOpen = true;
+    var primary = $('ps-continue').style.display === 'none' ? $('ps-connect') : $('ps-continue');
+    TRV.modal.open(modal, { onEscape: closeModal, initialFocus: primary });
   }
 
   function closeModal() {
     if (uploading) return; // don't close mid-upload
     modal.style.display = 'none';
+    modalOpen = false;
+    TRV.modal.close(modal);
   }
 
   $('publish-close').addEventListener('click', closeModal);
   $('ps-cancel').addEventListener('click', closeModal);
   modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
 
-  function fmtSize(bytes) {
-    return bytes > 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.round(bytes / 1024) + ' KB';
-  }
-
   function refreshSummary() {
     var exp = TRV.lastExport;
     $('ps-title').textContent = effectiveTitle();
     $('ps-privacy').textContent = ytPrivacy.options[ytPrivacy.selectedIndex].text;
-    $('ps-file').textContent = exp ? (exp.filename + ' · ' + fmtSize(exp.blob.size)) : '—';
+    $('ps-file').textContent = exp ? (exp.filename + ' · ' + TRV.fileSize(exp.blob.size)) : '—';
     var ch = TRV.youtube.getChannel();
-    $('ps-channel').textContent = ch ? ch.title : 'Not connected';
+    $('ps-channel').textContent = ch ? ch.title : TRV.t('notConnected');
     $('ps-connect').style.display = ch ? 'none' : '';
     $('ps-continue').style.display = ch ? '' : 'none';
   }
@@ -221,20 +271,25 @@
     doConnect().then(refreshSummary);
   });
 
-  $('ps-continue').addEventListener('click', function () {
+  function confirmText() {
     var privacy = ytPrivacy.value;
     var ch = TRV.youtube.getChannel();
-    var chName = ch ? ch.title : 'your channel';
-    var txt;
-    if (privacy === 'public') {
-      txt = 'The video will be PUBLIC immediately on the channel "' + chName + '". Everyone will be able to see it. Are you sure?';
-    } else if (privacy === 'unlisted') {
-      txt = 'The video will be uploaded as UNLISTED on "' + chName + '" — visible only to people with the link.';
-    } else {
-      txt = 'The video will be uploaded as PRIVATE on "' + chName + '" — visible only to you.';
-    }
-    $('pc-text').textContent = txt;
+    var chName = ch ? ch.title : TRV.t('yourChannel');
+    if (privacy === 'public') return TRV.t('confirmPublic', { c: chName });
+    if (privacy === 'unlisted') return TRV.t('confirmUnlisted', { c: chName });
+    return TRV.t('confirmPrivate', { c: chName });
+  }
+
+  $('ps-continue').addEventListener('click', function () {
+    $('pc-text').textContent = confirmText();
     showStep('confirm');
+  });
+
+  // Language switch while the modal is open: re-render its JS-built text
+  TRV.onLang(function () {
+    if (!modalOpen) return;
+    refreshSummary();
+    if (steps.confirm.style.display !== 'none') $('pc-text').textContent = confirmText();
   });
 
   $('pc-back').addEventListener('click', function () { showStep('summary'); });
@@ -247,7 +302,7 @@
     updatePublishButton();
     showStep('progress');
     $('pp-fill').style.width = '0%';
-    $('pp-status').textContent = 'Starting…';
+    $('pp-status').textContent = TRV.t('starting');
 
     TRV.youtube.upload(exp.blob, {
       title: effectiveTitle(),
@@ -259,8 +314,8 @@
     }).then(function (res) {
       uploading = false;
       updatePublishButton();
-      $('pr-title').textContent = '✅ Published!';
-      $('pr-text').textContent = 'Your video is on YouTube. Processing may take a minute before it appears.';
+      $('pr-title').textContent = TRV.t('published');
+      $('pr-text').textContent = TRV.t('publishedText');
       $('pr-retry').style.display = 'none';
       var link = $('pr-link');
       link.href = res.url;
@@ -269,7 +324,7 @@
     }).catch(function (err) {
       uploading = false;
       updatePublishButton();
-      $('pr-title').textContent = '⚠ Upload failed';
+      $('pr-title').textContent = TRV.t('uploadFailed');
       $('pr-text').textContent = err.message || String(err);
       $('pr-link').style.display = 'none';
       $('pr-retry').style.display = '';

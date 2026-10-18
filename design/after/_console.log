@@ -1,0 +1,20 @@
+﻿
+[] log.error Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:8123/favicon.ico
+[23-editor-export-error 1366x768 it] console.error Error: Nessun formato di registrazione supportato in questo browser.
+    at http://localhost:8123/js/exporter.js:249:27
+    at new Promise (<anonymous>)
+    at exportRealtime (http://localhost:8123/js/exporter.js:247:12)
+    at TRV.exportVideo (http://localhost:8123/js/exporter.js:345:12)
+    at runGenerate (http://localhost:8123/js/editor.js:624:16)
+    at HTMLButtonElement.<anonymous> (http://localhost:8123/js/editor.js:646:5)
+    at Object.setup (<anonymous>:269:26)
+    at async Object.setup (<anonymous>:519:21)
+[23-editor-export-error 375x667 it] console.error Error: Nessun formato di registrazione supportato in questo browser.
+    at http://localhost:8123/js/exporter.js:249:27
+    at new Promise (<anonymous>)
+    at exportRealtime (http://localhost:8123/js/exporter.js:247:12)
+    at TRV.exportVideo (http://localhost:8123/js/exporter.js:345:12)
+    at runGenerate (http://localhost:8123/js/editor.js:624:16)
+    at HTMLButtonElement.<anonymous> (http://localhost:8123/js/editor.js:646:5)
+    at Object.setup (<anonymous>:269:26)
+    at async Object.setup (<anonymous>:519:21)
