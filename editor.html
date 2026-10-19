@@ -52,15 +52,15 @@
     </div>
   </header>
 
-  <div class="ss-head">
-    <h1 class="ss-head__title" data-en="Build your ranking">Crea la tua classifica</h1>
-    <p class="ss-head__lede" data-en="Pick how many spots, load your clips and build your top list in seconds.">Scegli quante posizioni, carica le clip e monta la tua top in pochi secondi.</p>
-  </div>
-
   <main class="ss-editor">
 
-    <!-- ==================== Settings panel ==================== -->
-    <aside class="ss-panel" aria-label="Impostazioni" data-en-aria-label="Settings">
+    <div class="ss-head">
+      <h1 class="ss-head__title" data-en="Build your ranking">Crea la tua classifica</h1>
+      <p class="ss-head__lede" data-en="Pick how many spots, load your clips and build your top list in seconds.">Scegli quante posizioni, carica le clip e monta la tua top in pochi secondi.</p>
+    </div>
+
+    <!-- ==================== Panel 1: what goes in the video ==================== -->
+    <aside class="ss-panel ss-editor__make" aria-label="Clip e titolo" data-en-aria-label="Clips and title">
 
       <!-- ===== SECTION: Clips ===== -->
       <details class="ss-section" id="section-clips" open>
@@ -157,6 +157,34 @@
           </div>
         </div>
       </details>
+    </aside>
+
+    <!-- ==================== Stage: the preview hangs on the wall ==================== -->
+    <section class="ss-stage" aria-label="Anteprima" data-en-aria-label="Preview">
+      <div class="ss-frame">
+        <canvas id="preview-canvas" width="1080" height="1920"></canvas>
+      </div>
+      <div class="ss-timeline">
+        <div class="ss-timeline__bar">
+          <button class="ss-icon-btn" id="btn-play" type="button" disabled aria-label="Riproduci anteprima" title="Riproduci anteprima">
+            <svg class="ss-icon play-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z"/></svg>
+            <svg class="ss-icon pause-icon" viewBox="0 0 12 12" aria-hidden="true" hidden><path d="M4 2.5v7M8 2.5v7"/></svg>
+          </button>
+          <span class="ss-time" id="time-display"><b>0:00</b> / 0:00</span>
+        </div>
+        <div class="ss-timeline__lanes" id="progress-bar">
+          <div class="ss-scrub" id="progress-scrub" role="slider" tabindex="0"
+               aria-label="Avanzamento" data-en-aria-label="Playback position"
+               aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00 / 0:00">
+            <span class="ss-scrub__fill" id="progress-fill"></span>
+          </div>
+          <span class="ss-playhead" id="progress-thumb" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Panel 2: how it looks, where it goes ==================== -->
+    <aside class="ss-panel ss-editor__finish" aria-label="Impostazioni" data-en-aria-label="Settings">
 
       <!-- ===== SECTION: General Settings ===== -->
       <details class="ss-section" id="section-settings" open>
@@ -242,6 +270,7 @@
             </label>
             <button class="ss-link" id="btn-setup-edit" type="button" data-en="Change Google Client ID">Cambia Client ID Google</button>
           </div>
+          <div class="ss-row" id="youtube-soon" hidden><span class="ss-row__label">YouTube</span><span class="ss-badge" data-en="Coming soon">Presto</span></div>
           <div class="ss-row"><span class="ss-row__label">TikTok</span><span class="ss-badge" data-en="Coming soon">Presto</span></div>
           <div class="ss-row"><span class="ss-row__label">Instagram</span><span class="ss-badge" data-en="Coming soon">Presto</span></div>
         </div>
@@ -268,36 +297,15 @@
             <svg class="ss-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2v6M3.5 5.5 6 8l2.5-2.5M2 10h8"/></svg>
             <span id="btn-export-label">Genera il video classifica</span>
           </button>
-          <button class="ss-btn ss-btn--sm" id="btn-publish" disabled type="button" title="Prima genera il video">
-            <span id="btn-publish-label">Pubblica</span>
-          </button>
+          <div class="field-row">
+            <button class="ss-btn ss-btn--sm" id="btn-publish" disabled type="button" title="Prima genera il video">
+              <span id="btn-publish-label">Pubblica</span>
+            </button>
+            <span class="ss-badge" id="publish-soon" data-en="Coming soon" hidden>Presto</span>
+          </div>
         </div>
       </details>
     </aside>
-
-    <!-- ==================== Stage: the preview hangs on the wall ==================== -->
-    <section class="ss-stage" aria-label="Anteprima" data-en-aria-label="Preview">
-      <div class="ss-frame">
-        <canvas id="preview-canvas" width="1080" height="1920"></canvas>
-      </div>
-      <div class="ss-timeline">
-        <div class="ss-timeline__bar">
-          <button class="ss-icon-btn" id="btn-play" type="button" disabled aria-label="Riproduci anteprima" title="Riproduci anteprima">
-            <svg class="ss-icon play-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z"/></svg>
-            <svg class="ss-icon pause-icon" viewBox="0 0 12 12" aria-hidden="true" hidden><path d="M4 2.5v7M8 2.5v7"/></svg>
-          </button>
-          <span class="ss-time" id="time-display"><b>0:00</b> / 0:00</span>
-        </div>
-        <div class="ss-timeline__lanes" id="progress-bar">
-          <div class="ss-scrub" id="progress-scrub" role="slider" tabindex="0"
-               aria-label="Avanzamento" data-en-aria-label="Playback position"
-               aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00 / 0:00">
-            <span class="ss-scrub__fill" id="progress-fill"></span>
-          </div>
-          <span class="ss-playhead" id="progress-thumb" aria-hidden="true"></span>
-        </div>
-      </div>
-    </section>
 
   </main>
 

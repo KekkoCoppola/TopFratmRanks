@@ -33,14 +33,14 @@ Nato dal redesign di TopFratmRanks (branch `redesign/scrollstudio`). Da portare 
 | Evidenza nel testo | `.ss-hint b`, `.ss-note b`, `.ss-modal__body b/em`: `--ink-900`, peso e stile normali |
 | Badge con icona | `.ss-badge:has(.ss-icon) { gap: var(--s-1) }` |
 | `hidden` sui componenti | `.ss-note` è `display: flex` e vince sull'attributo `hidden`: nel kit serve `[hidden] { display: none !important }` (l'app l'ha in `style.css`) |
-| **N16** Editor su schermi larghi | `.ss-editor` prende tutta la parete: a 1600px la colonna dello stage è larga ~1150px e l'anteprima (max 300px) resta lontana dal pannello e fuori asse rispetto al titolo. Sopra 860px: `grid-template-columns: minmax(280px, var(--panel-w)) minmax(0, var(--stage-w)); justify-content: center` → pannello + stage sono un gruppo centrato sotto il titolo; la pagina resta larga uguale, la luce dello stage non si taglia |
+| **N17** Editor con l'anteprima al centro (sostituisce N16) | nel kit l'anteprima è al massimo 300px e ogni misura è in px fissi: su un 2560×1440 o un ultrawide anteprima e comandi restano minuscoli in mezzo alla parete. Ora l'anteprima prende l'altezza della finestra (`--stage-chrome` = quello che la divide con la cornice) e la timeline è larga quanto la cornice. Telefono: titolo, anteprima che riempie la prima schermata, poi i fogli; da 700px i due fogli affiancati sotto; orizzontale da 861px: titolo + foglio "make" (Clip, Titolo) \| stage; da 1200px: "make" \| stage \| foglio "finish" (Impostazioni, Pubblicazione, Esporta). Su schermi orizzontali grandi topbar, titolo, fogli, timeline, modali e footer sono ingranditi con `zoom: var(--k)`; lo stage no, perché `zoom` scala anche le unità viewport. Proposta per il kit: lo stesso principio della `u` dell'hub, applicato alle app |
 
 ## Token aggiunti
 
 | Token | Valore | Motivo |
 |---|---|---|
-| `--panel-w` | 340px | la colonna massima del pannello di `.ss-editor`, usata anche per il foglio della landing; oggi nel kit è un numero dentro `minmax(280px, 340px)` |
-| `--stage-w` | 560px | la colonna massima dello stage su schermi larghi (N16): la larghezza massima di `.ss-timeline`, oggi un numero nel kit |
+| `--panel-w` | 340px | un foglio di `.ss-editor` (×`--k`), usato anche per il foglio della landing; oggi nel kit è un numero dentro `minmax(280px, 340px)` |
+| `--k` | 1 → 2.25 | scala dei comandi (N17): `min(larghezza/1440, altezza/900)` arrotondato all'ottavo, solo su schermi orizzontali; 1 su telefoni e tablet |
 
 ## Scelte di TopFratmRanks da valutare per tutta la famiglia
 
@@ -164,14 +164,123 @@ Colori scritti a mano rimasti: ombre `rgb(var(--shadow-ink) / α)`; il ripiego `
   margin-left: 0;
 }
 
-/* N16 Wide screens: the kit's stage column takes all the wall left of the panel, so on a large
-   screen the 300px preview floats far from its controls and off the title's axis. Here the
-   stage column stops at the timeline's width and panel + stage stay one group, centred under
-   the title. The page stays as wide as before: the light behind the stage is not cut */
-@media (min-width: 861px) {
+/* N17 Preview-first editor (asked by the user, 2026-10-18; replaces N16). The preview is what
+   you look at, so it takes the window's height and the rest sits next to it, at its scale:
+   - phone: title, the preview filling the rest of the first screen, then the two sheets
+   - from 700px (and portrait tablets): the same, with the two sheets side by side
+   - landscape from 861px: title + sheet "make" (clips, video title) | stage
+   - landscape from 1200px: title + sheet "make" | stage | sheet "finish" (settings, publishing, export)
+   On landscape screens every control is zoomed by --k (tokens.css). The stage is not: its frame
+   is sized on 100svh, and zoom scales viewport units too. --stage-chrome is what shares the
+   window's height with the frame: topbar, title, gaps, timeline and a margin under it */
+
+.ss-editor {
+  --stage-chrome: 288px;
+  --frame-w: min(100%, calc((100svh - var(--stage-chrome)) * 9 / 16));
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "head" "stage" "make" "finish";
+  gap: var(--s-5);
+}
+
+.ss-editor > .ss-head {
+  grid-area: head;
+  padding: var(--s-2) 0 0;
+}
+
+.ss-editor > .ss-stage {
+  grid-area: stage;
+  position: relative;
+  top: auto;
+}
+
+.ss-editor__make {
+  grid-area: make;
+}
+
+.ss-editor__finish {
+  grid-area: finish;
+}
+
+/* The light behind the stage stays behind the sheets next to it */
+.ss-editor > .ss-panel {
+  position: relative;
+  z-index: 1;
+}
+
+/* The timeline is as wide as the frame it plays */
+.ss-editor .ss-frame,
+.ss-editor .ss-timeline {
+  width: var(--frame-w);
+}
+
+@media (min-width: 700px) {
   .ss-editor {
-    grid-template-columns: minmax(280px, var(--panel-w)) minmax(0, var(--stage-w));
+    --stage-chrome: 278px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: "head head" "stage stage" "make finish";
+  }
+}
+
+@media (orientation: landscape) and (min-width: 861px) {
+  .ss-editor {
+    --stage-chrome: calc(184px * var(--k));
+    --frame-w: 100%; /* the stage column is already the frame's width */
+    grid-template-columns:
+      calc(var(--panel-w) * var(--k))
+      minmax(0, calc((100svh - var(--stage-chrome)) * 9 / 16));
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas: "head stage" "make stage" "finish stage" ". stage";
     justify-content: center;
+    gap: calc(var(--s-5) * var(--k)) calc(var(--s-6) * var(--k));
+    padding-top: calc(var(--s-2) * var(--k));
+    padding-bottom: calc(var(--s-7) * var(--k));
+  }
+
+  .ss-editor > .ss-head {
+    align-items: flex-start;
+    padding: 0;
+    text-align: left;
+  }
+
+  .ss-editor > .ss-stage {
+    position: sticky;
+    top: calc(var(--s-3) * var(--k));
+    gap: calc(var(--s-5) * var(--k));
+  }
+
+  .ss-editor .ss-timeline {
+    max-width: none;
+  }
+
+  .ss-topbar,
+  .ss-head,
+  .ss-panel,
+  .ss-timeline,
+  .ss-modal,
+  .ss-footer {
+    zoom: var(--k);
+  }
+
+  /* Inside a zoomed box the gutter (px and vw) is zoomed too: divided back, edges stay aligned */
+  .ss-topbar,
+  .ss-head,
+  .ss-footer {
+    padding-inline: calc(var(--gutter) / var(--k));
+  }
+
+  .ss-modal--scroll {
+    max-height: calc((100svh - 2 * var(--gutter)) / var(--k));
+  }
+}
+
+@media (orientation: landscape) and (min-width: 1200px) {
+  .ss-editor {
+    grid-template-columns:
+      calc(var(--panel-w) * var(--k))
+      minmax(0, calc((100svh - var(--stage-chrome)) * 9 / 16))
+      calc(var(--panel-w) * var(--k));
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: "head stage finish" "make stage finish" ". stage finish";
   }
 }
 
@@ -684,7 +793,19 @@ In `css/tokens.css`, in coda:
    ========================================================================== */
 
 :root {
-  --panel-w: 340px; /* widest settings sheet: the max column of .ss-editor's panel in family.css; the landing uses the same sheet */
-  --stage-w: 560px; /* widest stage column on wide screens: the max-width of .ss-timeline in family.css */
+  --panel-w: 340px; /* one settings sheet: a column of .ss-editor in family.css; the landing uses the same sheet */
+  --k: 1;           /* N17 control scale: the kit's px are drawn for a 1440×900 window */
 }
+
+/* N17 On big landscape screens the preview grows with the window, so the controls grow with it:
+   --k = min(width / 1440, height / 900), rounded down to an eighth, from 1 to 2.25
+   (the hub does the same with its "u"). Phones and tablets keep the kit's px */
+@media (orientation: landscape) and (min-width: 1620px) and (min-height: 1013px) { :root { --k: 1.125; } }
+@media (orientation: landscape) and (min-width: 1800px) and (min-height: 1125px) { :root { --k: 1.25; } }
+@media (orientation: landscape) and (min-width: 1980px) and (min-height: 1238px) { :root { --k: 1.375; } }
+@media (orientation: landscape) and (min-width: 2160px) and (min-height: 1350px) { :root { --k: 1.5; } }
+@media (orientation: landscape) and (min-width: 2340px) and (min-height: 1463px) { :root { --k: 1.625; } }
+@media (orientation: landscape) and (min-width: 2520px) and (min-height: 1575px) { :root { --k: 1.75; } }
+@media (orientation: landscape) and (min-width: 2880px) and (min-height: 1800px) { :root { --k: 2; } }
+@media (orientation: landscape) and (min-width: 3240px) and (min-height: 2025px) { :root { --k: 2.25; } }
 ```

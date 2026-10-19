@@ -25,11 +25,16 @@
 
   var uploading = false;
 
+  // Publishing switched off in config.js: shown as "coming soon", nothing to click
+  var available = !!(window.TRV_CONFIG && TRV_CONFIG.publishing);
+  $('youtube-soon').hidden = available;
+  $('publish-soon').hidden = available;
+
   /* ---------- configured vs not ---------- */
   function renderConfigState() {
     var ok = TRV.youtube.isConfigured();
-    notConfigured.style.display = ok ? 'none' : '';
-    configured.style.display = ok ? '' : 'none';
+    notConfigured.style.display = available && !ok ? '' : 'none';
+    configured.style.display = available && ok ? '' : 'none';
   }
   renderConfigState();
 
@@ -201,6 +206,12 @@
   var generatingForPublish = false;
 
   function updatePublishButton() {
+    if (!available) {
+      publishBtn.disabled = true;
+      publishBtnLabel.textContent = TRV.t('publish');
+      publishBtn.title = TRV.t('publishTitleSoon');
+      return;
+    }
     var hasVideo = !!TRV.lastExport;
     var confOk = TRV.youtube.isConfigured();
     var canGenerate = TRV.loadedClipCount() >= 1;

@@ -1362,14 +1362,123 @@ h3 {
   margin-left: 0;
 }
 
-/* N16 Wide screens: the kit's stage column takes all the wall left of the panel, so on a large
-   screen the 300px preview floats far from its controls and off the title's axis. Here the
-   stage column stops at the timeline's width and panel + stage stay one group, centred under
-   the title. The page stays as wide as before: the light behind the stage is not cut */
-@media (min-width: 861px) {
+/* N17 Preview-first editor (asked by the user, 2026-10-18; replaces N16). The preview is what
+   you look at, so it takes the window's height and the rest sits next to it, at its scale:
+   - phone: title, the preview filling the rest of the first screen, then the two sheets
+   - from 700px (and portrait tablets): the same, with the two sheets side by side
+   - landscape from 861px: title + sheet "make" (clips, video title) | stage
+   - landscape from 1200px: title + sheet "make" | stage | sheet "finish" (settings, publishing, export)
+   On landscape screens every control is zoomed by --k (tokens.css). The stage is not: its frame
+   is sized on 100svh, and zoom scales viewport units too. --stage-chrome is what shares the
+   window's height with the frame: topbar, title, gaps, timeline and a margin under it */
+
+.ss-editor {
+  --stage-chrome: 288px;
+  --frame-w: min(100%, calc((100svh - var(--stage-chrome)) * 9 / 16));
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "head" "stage" "make" "finish";
+  gap: var(--s-5);
+}
+
+.ss-editor > .ss-head {
+  grid-area: head;
+  padding: var(--s-2) 0 0;
+}
+
+.ss-editor > .ss-stage {
+  grid-area: stage;
+  position: relative;
+  top: auto;
+}
+
+.ss-editor__make {
+  grid-area: make;
+}
+
+.ss-editor__finish {
+  grid-area: finish;
+}
+
+/* The light behind the stage stays behind the sheets next to it */
+.ss-editor > .ss-panel {
+  position: relative;
+  z-index: 1;
+}
+
+/* The timeline is as wide as the frame it plays */
+.ss-editor .ss-frame,
+.ss-editor .ss-timeline {
+  width: var(--frame-w);
+}
+
+@media (min-width: 700px) {
   .ss-editor {
-    grid-template-columns: minmax(280px, var(--panel-w)) minmax(0, var(--stage-w));
+    --stage-chrome: 278px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: "head head" "stage stage" "make finish";
+  }
+}
+
+@media (orientation: landscape) and (min-width: 861px) {
+  .ss-editor {
+    --stage-chrome: calc(184px * var(--k));
+    --frame-w: 100%; /* the stage column is already the frame's width */
+    grid-template-columns:
+      calc(var(--panel-w) * var(--k))
+      minmax(0, calc((100svh - var(--stage-chrome)) * 9 / 16));
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas: "head stage" "make stage" "finish stage" ". stage";
     justify-content: center;
+    gap: calc(var(--s-5) * var(--k)) calc(var(--s-6) * var(--k));
+    padding-top: calc(var(--s-2) * var(--k));
+    padding-bottom: calc(var(--s-7) * var(--k));
+  }
+
+  .ss-editor > .ss-head {
+    align-items: flex-start;
+    padding: 0;
+    text-align: left;
+  }
+
+  .ss-editor > .ss-stage {
+    position: sticky;
+    top: calc(var(--s-3) * var(--k));
+    gap: calc(var(--s-5) * var(--k));
+  }
+
+  .ss-editor .ss-timeline {
+    max-width: none;
+  }
+
+  .ss-topbar,
+  .ss-head,
+  .ss-panel,
+  .ss-timeline,
+  .ss-modal,
+  .ss-footer {
+    zoom: var(--k);
+  }
+
+  /* Inside a zoomed box the gutter (px and vw) is zoomed too: divided back, edges stay aligned */
+  .ss-topbar,
+  .ss-head,
+  .ss-footer {
+    padding-inline: calc(var(--gutter) / var(--k));
+  }
+
+  .ss-modal--scroll {
+    max-height: calc((100svh - 2 * var(--gutter)) / var(--k));
+  }
+}
+
+@media (orientation: landscape) and (min-width: 1200px) {
+  .ss-editor {
+    grid-template-columns:
+      calc(var(--panel-w) * var(--k))
+      minmax(0, calc((100svh - var(--stage-chrome)) * 9 / 16))
+      calc(var(--panel-w) * var(--k));
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: "head stage finish" "make stage finish" ". stage finish";
   }
 }
 
